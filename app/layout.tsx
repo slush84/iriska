@@ -1,34 +1,51 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Newsreader, Bricolage_Grotesque, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Editorial display — Newsreader italic
+const newsreader = Newsreader({
   subsets: ["latin"],
+  weight: ["400", "500"],
+  style: ["italic", "normal"],
+  variable: "--font-newsreader",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+// UI default — Bricolage Grotesque
+const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-bricolage",
+  display: "swap",
+});
+
+// Labels — JetBrains Mono
+const jetbrains = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["500"],
+  variable: "--font-jetbrains",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Iriska | AI-Powered HoReCa Marketplace",
+  title: "Iriska.AI — The Mediterranean, well-chosen",
   description:
-    "Iriska is a B2B AI-powered marketplace for HoReCa teams sourcing wine, jamon, cheeses, and olive oil.",
+    "AI-powered B2B procurement platform for HoReCa. Source premium Mediterranean wine, jamon, cheeses, and olive oil with precision.",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${newsreader.variable} ${bricolage.variable} ${jetbrains.variable}`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="font-sans bg-linen text-ink antialiased">
+        {children}
+      </body>
     </html>
   );
 }
