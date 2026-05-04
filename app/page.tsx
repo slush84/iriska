@@ -1,147 +1,186 @@
-import { Logo } from "@/components/Logo";
+import Link from 'next/link'
+import { getGiEntriesPage } from '@/lib/queries/gi-entries'
+import { slugify } from '@/lib/utils/slug'
+import { CountryFilter } from '@/app/catalog/_components/CountryFilter'
+import { CategoryFilter } from '@/app/catalog/_components/CategoryFilter'
+import { SearchBox } from '@/app/catalog/_components/SearchBox'
 
-const curatedProducts = [
-  {
-    name: "Rioja Reserva 2019",
-    origin: "La Rioja, ES",
-    trust: 98,
-    price: "€24",
-  },
-  {
-    name: "Manchego 12-month",
-    origin: "La Mancha, ES",
-    trust: 94,
-    price: "€38",
-  },
-  {
-    name: "Koroneiki EV Oil",
-    origin: "Crete, GR",
-    trust: 92,
-    price: "€18",
-  },
-];
+const COUNTRY_FLAGS: Record<string, string> = {
+  IT: '🇮🇹',
+  ES: '🇪🇸',
+  FR: '🇫🇷',
+  PT: '🇵🇹',
+  GR: '🇬🇷',
+}
 
-export default function Home() {
-  const valuePoints = [
-    "AI-powered matching between HoReCa buyers and vetted suppliers",
-    "Transparent wholesale pricing and smart volume recommendations",
-    "Reliable logistics planning for recurring B2B procurement",
-  ];
+const CATEGORY_LABELS: Record<string, string> = {
+  cured_meats_charcuterie: 'Charcuterie',
+  cheeses_dairy: 'Cheese & Dairy',
+  olive_oils_olives: 'Olive Oil',
+  fruits_nuts: 'Fruits & Nuts',
+  seafood_conservas: 'Seafood',
+  vinegars_condiments: 'Vinegars & Condiments',
+  spices_salt_herbs: 'Spices, Salt & Herbs',
+  preserves_pantry: 'Preserves',
+  rice_pasta_grains: 'Rice, Pasta & Grains',
+  honey_sweeteners: 'Honey',
+  sweets_pastry_confectionery: 'Sweets & Pastry',
+}
+
+interface CatalogPageProps {
+  searchParams: Promise<{
+    page?: string
+    country?: string
+    category?: string
+    search?: string
+  }>
+}
+
+type SearchParamsRecord = Awaited<CatalogPageProps['searchParams']>
+
+export default async function CatalogPage({ searchParams }: CatalogPageProps) {
+  const params = await searchParams
+
+  const page = parseInt(params.page ?? '1', 10) || 1
+  const countryCode = params.country ?? ''
+  const category = params.category ?? ''
+  const search = params.search ?? ''
+
+  const { entries, totalCount, totalPages, currentPage } = await getGiEntriesPage({
+    page,
+    countryCode,
+    category,
+    search,
+  })
+
+  const hasActiveFilters = Boolean(countryCode || category || search)
 
   return (
     <div className="min-h-screen bg-linen text-ink">
       <main className="max-w-content mx-auto flex w-full flex-col px-6 py-12 md:px-10 md:py-16">
-        <header className="mb-20 flex items-center justify-between">
-          <Logo width={180} priority />
-          <a
-            href="#contact"
-            className="rounded-full bg-burgundy px-5 py-2 text-sm font-semibold text-cream transition-colors hover:bg-burgundy-deep"
-          >
-            Request Access
-          </a>
+        <header className="mb-10">
+          <p className="font-mono text-xs uppercase tracking-[0.14em] text-burgundy">Catalog</p>
+          <h1 className="font-display mt-2 text-4xl italic leading-tight tracking-[-0.025em] text-burgundy-deep md:text-5xl">
+            Mediterranean Geographical Indications
+          </h1>
+          <p className="mt-3 text-base text-graphite">
+            Browse {totalCount.toLocaleString()} protected products from Italy, Spain, France, Portugal & Greece.
+          </p>
         </header>
 
-        <section className="grid gap-14 md:grid-cols-[1.1fr_0.9fr] md:items-end">
-          <div className="space-y-8">
-            <p className="font-mono text-xs uppercase tracking-[0.14em] text-burgundy">
-              AI-powered B2B marketplace for HoReCa
-            </p>
-            <h1 className="font-display max-w-3xl text-5xl italic leading-[1.02] tracking-[-0.035em] text-burgundy-deep md:text-7xl">
-              Source premium Mediterranean products with precision.
-            </h1>
-            <p className="max-w-xl text-lg leading-8 text-graphite">
-              The Mediterranean, well-chosen.
-            </p>
-            <p className="max-w-xl text-lg leading-8 text-graphite">
-              Iriska helps restaurants, hotels, and catering teams purchase
-              wine, jamon, cheeses, and olive oil through one intelligent
-              procurement platform.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <a
-                href="#contact"
-                className="rounded-full bg-burgundy px-6 py-3 text-sm font-semibold text-cream transition-colors hover:bg-burgundy-deep"
-              >
-                Book a Demo
-              </a>
-              <a
-                href="#products"
-                className="rounded-full border border-pebble/60 px-6 py-3 text-sm font-semibold text-burgundy transition-colors hover:border-burgundy/40"
-              >
-                Explore Categories
-              </a>
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-pebble/60 bg-cream p-8">
-            <p className="mb-5 font-mono text-xs uppercase tracking-[0.14em] text-burgundy">
-              Why Iriska
-            </p>
-            <ul className="space-y-4 text-base leading-7 text-graphite">
-              {valuePoints.map((point) => (
-                <li key={point} className="flex gap-3">
-                  <span className="mt-2 h-2 w-2 rounded-full bg-olive" />
-                  <span>{point}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+        <section aria-label="Filters" className="mb-8 flex flex-col gap-5 border-y border-pebble/40 py-6">
+          <SearchBox currentSearch={search} />
+          <CountryFilter currentCountry={countryCode} />
+          <CategoryFilter currentCategory={category} />
         </section>
 
-        <section id="products" className="mt-24">
-          <p className="mb-6 font-mono text-xs uppercase tracking-[0.14em] text-burgundy">
-            Product Portfolio
+        <div className="mb-6 flex items-center justify-between">
+          <p className="font-mono text-xs uppercase tracking-[0.14em] text-graphite">
+            {totalCount.toLocaleString()} {totalCount === 1 ? 'result' : 'results'}
           </p>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {curatedProducts.map((product) => (
-              <article
-                key={product.name}
-                className="rounded-2xl border border-pebble/60 bg-cream p-6"
-              >
-                <div className="mb-5 flex items-center justify-between">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-pebble/60 bg-bone px-3 py-1 text-xs font-medium text-graphite">
-                    <span
-                      aria-hidden
-                      className="grid h-5 w-5 place-items-center rounded-full"
-                      style={{
-                        background: `conic-gradient(#722f3a ${product.trust}%, #ede5d4 ${product.trust}% 100%)`,
-                      }}
-                    >
-                      <span className="h-3 w-3 rounded-full bg-cream" />
-                    </span>
-                    Trust {product.trust}
-                  </div>
-                  <p className="text-lg font-semibold text-burgundy">{product.price}</p>
-                </div>
-                <h2 className="text-xl font-semibold text-ink">{product.name}</h2>
-                <p className="mt-2 text-sm text-stone">{product.origin}</p>
-              </article>
-            ))}
-          </div>
-        </section>
+          {hasActiveFilters && (
+            <Link
+              href="/catalog"
+              className="font-mono text-xs uppercase tracking-[0.14em] text-burgundy hover:text-burgundy-deep"
+            >
+              Clear filters ✕
+            </Link>
+          )}
+        </div>
 
-        <section
-          id="contact"
-          className="mt-24 rounded-3xl bg-burgundy px-8 py-10 text-cream md:px-12"
-        >
-          <p className="font-mono text-xs uppercase tracking-[0.14em] text-ochre-soft">
-            For procurement teams
-          </p>
-          <h2 className="font-display mt-4 text-3xl italic leading-tight md:text-4xl">
-            Transform your HoReCa sourcing with data-backed buying decisions.
-          </h2>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-cream/85">
-            Join Iriska to centralize supplier discovery, optimize order cycles,
-            and scale quality across every location.
-          </p>
-          <a
-            href="mailto:sales@iriska.com"
-            className="mt-8 inline-flex rounded-full bg-cream px-6 py-3 text-sm font-semibold text-burgundy transition-colors hover:bg-bone"
-          >
-            Contact Sales
-          </a>
-        </section>
+        {entries.length > 0 ? (
+         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+         {entries.map((entry) => {
+           const slug = slugify(entry.primary_gi_name)
+           return (
+             <li key={entry.gi_id}>
+               <Link
+                 href={`/catalog/${entry.country_code}/${slug}`}
+                 className="block h-full rounded-2xl border border-pebble/60 bg-cream p-5 transition-colors hover:border-burgundy/40"
+               >
+                 <div className="mb-3 flex items-center justify-between">
+                   <span className="text-2xl" aria-label={entry.country}>
+                     {COUNTRY_FLAGS[entry.country_code] ?? entry.country_code}
+                   </span>
+                   <span className="rounded-full border border-pebble/60 bg-bone px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-graphite">
+                     {entry.gi_type_primary}
+                   </span>
+                 </div>
+                 <h2 className="font-display text-lg italic leading-snug text-burgundy-deep">
+                   {entry.primary_gi_name}
+                 </h2>
+                 <p className="mt-2 text-xs uppercase tracking-[0.1em] text-stone">
+                   {CATEGORY_LABELS[entry.category] ?? entry.category}
+                 </p>
+               </Link>
+             </li>
+           )
+         })}
+       </ul>
+        ) : (
+          <EmptyState />
+        )}
+
+        {entries.length > 0 && totalPages > 1 && (
+          <nav className="mt-12 flex items-center justify-between border-t border-pebble/40 pt-6">
+            <PaginationLink params={params} targetPage={currentPage - 1} disabled={currentPage <= 1} label="← Previous" />
+            <p className="font-mono text-xs uppercase tracking-[0.14em] text-graphite">
+              Page {currentPage} of {totalPages}
+            </p>
+            <PaginationLink params={params} targetPage={currentPage + 1} disabled={currentPage >= totalPages} label="Next →" />
+          </nav>
+        )}
       </main>
     </div>
-  );
+  )
+}
+
+function EmptyState() {
+  return (
+    <div className="rounded-2xl border border-pebble/60 bg-cream px-8 py-16 text-center">
+      <p className="font-display text-2xl italic text-burgundy-deep">No products match your filters.</p>
+      <p className="mt-3 text-base text-graphite">
+        Try removing one or more filters, or{' '}
+        <Link href="/catalog" className="text-burgundy underline hover:text-burgundy-deep">
+          clear all
+        </Link>
+        {' '}to start over.
+      </p>
+    </div>
+  )
+}
+
+function PaginationLink({
+  params,
+  targetPage,
+  disabled,
+  label,
+}: {
+  params: SearchParamsRecord
+  targetPage: number
+  disabled: boolean
+  label: string
+}) {
+  if (disabled) {
+    return (
+      <span className="cursor-not-allowed rounded-full border border-pebble/60 px-5 py-2 text-sm font-semibold text-stone">
+        {label}
+      </span>
+    )
+  }
+
+  const queryParams = new URLSearchParams()
+  if (params.country) queryParams.set('country', params.country)
+  if (params.category) queryParams.set('category', params.category)
+  if (params.search) queryParams.set('search', params.search)
+  queryParams.set('page', String(targetPage))
+
+  return (
+    <Link
+      href={`/catalog?${queryParams.toString()}`}
+      className="rounded-full border border-pebble/60 px-5 py-2 text-sm font-semibold text-burgundy transition-colors hover:border-burgundy/40"
+    >
+      {label}
+    </Link>
+  )
 }
