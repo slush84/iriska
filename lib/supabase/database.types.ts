@@ -72,6 +72,7 @@ export type Database = {
           is_data_thin: boolean
           packaging_formats: Json
           primary_gi_name: string
+          primary_gi_name_search: string | null
           seasonal_months: Json
           source_layer: string
           tasting_notes: string | null
@@ -91,6 +92,7 @@ export type Database = {
           is_data_thin?: boolean
           packaging_formats?: Json
           primary_gi_name: string
+          primary_gi_name_search?: string | null
           seasonal_months?: Json
           source_layer?: string
           tasting_notes?: string | null
@@ -110,6 +112,7 @@ export type Database = {
           is_data_thin?: boolean
           packaging_formats?: Json
           primary_gi_name?: string
+          primary_gi_name_search?: string | null
           seasonal_months?: Json
           source_layer?: string
           tasting_notes?: string | null
@@ -525,7 +528,10 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      immutable_unaccent: { Args: { "": string }; Returns: string }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
+      unaccent: { Args: { "": string }; Returns: string }
     }
     Enums: {
       [_ in never]: never
