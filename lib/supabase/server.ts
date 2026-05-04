@@ -1,7 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
+import type { Database } from './database.types'
 
 /**
  * Supabase client for server components (Next.js App Router).
+ *
+ * Typed against the Iriska database schema in lib/supabase/database.types.ts.
+ * Re-generate types after schema changes:
+ *   supabase gen types typescript --linked > lib/supabase/database.types.ts
  *
  * Use this in:
  *   - Server Components (default for files in app/)
@@ -22,7 +27,7 @@ export function createSupabaseServerClient() {
     )
   }
 
-  return createClient(url, anonKey, {
+  return createClient<Database>(url, anonKey, {
     auth: {
       // Server components don't manage user sessions client-side.
       persistSession: false,
