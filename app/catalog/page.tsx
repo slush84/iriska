@@ -1,5 +1,8 @@
 import Link from 'next/link'
 import { getGiEntriesPage } from '@/lib/queries/gi-entries'
+import { CountryFilter } from './_components/CountryFilter'
+import { CategoryFilter } from './_components/CategoryFilter'
+import { SearchBox } from './_components/SearchBox'
 
 const COUNTRY_FLAGS: Record<string, string> = {
   IT: '🇮🇹',
@@ -24,82 +27,131 @@ const CATEGORY_LABELS: Record<string, string> = {
 }
 
 interface CatalogPageProps {
-  searchParams: Promise<{ page?: string }>
+  searchParams: Promise<{
+    page?: string
+    country?: string
+    category?: string
+    search?: string
+  }>
 }
+
+type SearchParamsRecord = Awaited<CatalogPageProps['searchParams']>
 
 export default async function CatalogPage({ searchParams }: CatalogPageProps) {
   const params = await searchParams
-  const page = parseInt(params.page ?? '1', 10) || 1
 
-  const { entries, totalCount, totalPages, currentPage } =
-    await getGiEntriesPage(page)
+  const page = parseInt(params.page ?? '1', 10) || 1
+  const countryCode = params.country ?? ''
+  const category = params.category ?? ''
+  const search = params.search ?? ''
+
+  const { entries, totalCount, totalPages, currentPage } = await getGiEntriesPage({
+    page,
+    countryCode,
+    category,
+    search,
+  })
+
+  const hasActiveFilters = Boolean(countryCode || category || search)
 
   return (
     <div className="min-h-screen bg-linen text-ink">
       <main className="max-w-content mx-auto flex w-full flex-col px-6 py-12 md:px-10 md:py-16">
-        <header className="mb-12">
-          <p className="font-mono text-xs uppercase tracking-[0.14em] text-burgundy">
-            Catalog
-          </p>
+        <header className="mb-10">
+          <p className="font-mono text-xs uppercase tracking-[0.14em] text-burgundy">Catalog</p>
           <h1 className="font-display mt-2 text-4xl italic leading-tight tracking-[-0.025em] text-burgundy-deep md:text-5xl">
             Mediterranean Geographical Indications
           </h1>
           <p className="mt-3 text-base text-graphite">
-            {totalCount.toLocaleString()} protected products from Italy, Spain,
-            France, Portugal & Greece.
+            Browse {totalCount.toLocaleString()} protected products from Italy, Spain, France, Portugal & Greece.
           </p>
         </header>
 
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {entries.map((entry) => (
-            <li
-              key={entry.gi_id}
-              className="rounded-2xl border border-pebble/60 bg-cream p-5 transition-colors hover:border-burgundy/40"
-            >
-              <div className="mb-3 flex items-center justify-between">
-                <span className="text-2xl" aria-label={entry.country}>
-                  {COUNTRY_FLAGS[entry.country_code] ?? entry.country_code}
-                </span>
-                <span className="rounded-full border border-pebble/60 bg-bone px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-graphite">
-                  {entry.gi_type_primary}
-                </span>
-              </div>
-              <h2 className="font-display text-lg italic leading-snug text-burgundy-deep">
-                {entry.primary_gi_name}
-              </h2>
-              <p className="mt-2 text-xs uppercase tracking-[0.1em] text-stone">
-                {CATEGORY_LABELS[entry.category] ?? entry.category}
-              </p>
-            </li>
-          ))}
-        </ul>
+        <section aria-label="Filters" className="mb-8 flex flex-col gap-5 border-y border-pebble/40 py-6">
+          <SearchBox currentSearch={search} />
+          <CountryFilter currentCountry={countryCode} />
+          <CategoryFilter currentCategory={category} />
+        </section>
 
-        <nav className="mt-12 flex items-center justify-between border-t border-pebble/40 pt-6">
-          <PaginationLink
-            page={currentPage - 1}
-            disabled={currentPage <= 1}
-            label="← Previous"
-          />
+        <div className="mb-6 flex items-center justify-between">
           <p className="font-mono text-xs uppercase tracking-[0.14em] text-graphite">
-            Page {currentPage} of {totalPages}
+            {totalCount.toLocaleString()} {totalCount === 1 ? 'result' : 'results'}
           </p>
-          <PaginationLink
-            page={currentPage + 1}
-            disabled={currentPage >= totalPages}
-            label="Next →"
-          />
-        </nav>
+          {hasActiveFilters && (
+            <Link
+              href="/catalog"
+              className="font-mono text-xs uppercase tracking-[0.14em] text-burgundy hover:text-burgundy-deep"
+            >
+              Clear filters ✕
+            </Link>
+          )}
+        </div>
+
+        {entries.length > 0 ? (
+          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {entries.map((entry) => (
+              <li
+                key={entry.gi_id}
+                className="rounded-2xl border border-pebble/60 bg-cream p-5 transition-colors hover:border-burgundy/40"
+              >
+                <div className="mb-3 flex items-center justify-between">
+                  <span className="text-2xl" aria-label={entry.country}>
+                    {COUNTRY_FLAGS[entry.country_code] ?? entry.country_code}
+                  </span>
+                  <span className="rounded-full border border-pebble/60 bg-bone px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-graphite">
+                    {entry.gi_type_primary}
+                  </span>
+                </div>
+                <h2 className="font-display text-lg italic leading-snug text-burgundy-deep">
+                  {entry.primary_gi_name}
+                </h2>
+                <p className="mt-2 text-xs uppercase tracking-[0.1em] text-stone">
+                  {CATEGORY_LABELS[entry.category] ?? entry.category}
+                </p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <EmptyState />
+        )}
+
+        {entries.length > 0 && totalPages > 1 && (
+          <nav className="mt-12 flex items-center justify-between border-t border-pebble/40 pt-6">
+            <PaginationLink params={params} targetPage={currentPage - 1} disabled={currentPage <= 1} label="← Previous" />
+            <p className="font-mono text-xs uppercase tracking-[0.14em] text-graphite">
+              Page {currentPage} of {totalPages}
+            </p>
+            <PaginationLink params={params} targetPage={currentPage + 1} disabled={currentPage >= totalPages} label="Next →" />
+          </nav>
+        )}
       </main>
     </div>
   )
 }
 
+function EmptyState() {
+  return (
+    <div className="rounded-2xl border border-pebble/60 bg-cream px-8 py-16 text-center">
+      <p className="font-display text-2xl italic text-burgundy-deep">No products match your filters.</p>
+      <p className="mt-3 text-base text-graphite">
+        Try removing one or more filters, or{' '}
+        <Link href="/catalog" className="text-burgundy underline hover:text-burgundy-deep">
+          clear all
+        </Link>
+        {' '}to start over.
+      </p>
+    </div>
+  )
+}
+
 function PaginationLink({
-  page,
+  params,
+  targetPage,
   disabled,
   label,
 }: {
-  page: number
+  params: SearchParamsRecord
+  targetPage: number
   disabled: boolean
   label: string
 }) {
@@ -111,9 +163,15 @@ function PaginationLink({
     )
   }
 
+  const queryParams = new URLSearchParams()
+  if (params.country) queryParams.set('country', params.country)
+  if (params.category) queryParams.set('category', params.category)
+  if (params.search) queryParams.set('search', params.search)
+  queryParams.set('page', String(targetPage))
+
   return (
     <Link
-      href={`/catalog?page=${page}`}
+      href={`/catalog?${queryParams.toString()}`}
       className="rounded-full border border-pebble/60 px-5 py-2 text-sm font-semibold text-burgundy transition-colors hover:border-burgundy/40"
     >
       {label}
