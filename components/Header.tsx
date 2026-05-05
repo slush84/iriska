@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Logo } from '@/components/Logo'
+import { RequestAccessButton } from '@/components/RequestAccessButton'
 
 export function Header() {
   return (
@@ -28,20 +29,10 @@ export function Header() {
           >
             For Suppliers
           </Link>
-          <a
-            href="mailto:hello@iriska.ai?subject=Iriska%20Access%20Request"
-            className="rounded-full bg-burgundy px-5 py-2 font-mono text-xs uppercase tracking-[0.14em] text-cream transition-colors hover:bg-burgundy-deep"
-          >
-            Request Access
-          </a>
+          <RequestAccessButton />
         </nav>
 
-        <a
-          href="mailto:hello@iriska.ai?subject=Iriska%20Access%20Request"
-          className="rounded-full bg-burgundy px-4 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-cream md:hidden"
-        >
-          Request Access
-        </a>
+        <RequestAccessButton size="small" className="md:hidden" />
       </div>
     </header>
   )

@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getGiDetail } from '@/lib/queries/gi-entries'
+import { Header } from '@/components/Header'
+import { Footer } from '@/components/Footer'
 
 const COUNTRY_FLAGS: Record<string, string> = {
   IT: '🇮🇹',
@@ -48,6 +50,7 @@ export default async function GiDetailPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-linen text-ink">
+      <Header />
       <main className="max-w-content mx-auto flex w-full flex-col px-6 py-12 md:px-10 md:py-16">
         <Link
           href="/catalog"
@@ -200,6 +203,7 @@ export default async function GiDetailPage({ params }: PageProps) {
           </p>
         )}
       </main>
+      <Footer />
     </div>
   )
 }
