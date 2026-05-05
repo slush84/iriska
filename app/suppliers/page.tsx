@@ -4,6 +4,8 @@ import { Footer } from '@/components/Footer'
 import { RequestAccessButton } from '@/components/RequestAccessButton'
 import { getIriskaStats } from '@/lib/queries/stats'
 
+// Revalidate hourly to refresh live stats from BD
+export const revalidate = 3600
 export default async function SuppliersPage() {
   const stats = await getIriskaStats()
 
@@ -13,7 +15,7 @@ export default async function SuppliersPage() {
 
       <main>
         {/* Hero */}
-        <section className="max-w-content mx-auto px-6 py-20 md:px-10 md:py-28">
+        <section className="max-w-content mx-auto px-6 py-26 md:px-10 md:py-20">
           <p className="font-mono text-xs uppercase tracking-[0.14em] text-burgundy">
             For producers and distributors
           </p>
@@ -42,7 +44,7 @@ export default async function SuppliersPage() {
 
         {/* Why Iriska — 4 reasons */}
         <section className="border-y border-pebble/40 bg-cream">
-          <div className="max-w-content mx-auto px-6 py-20 md:px-10 md:py-28">
+          <div className="max-w-content mx-auto px-6 py-16 md:px-10 md:py-20">
             <p className="font-mono text-xs uppercase tracking-[0.14em] text-burgundy">
               Why Iriska
             </p>
@@ -75,7 +77,7 @@ export default async function SuppliersPage() {
         </section>
 
         {/* How it works for suppliers */}
-        <section className="max-w-content mx-auto px-6 py-20 md:px-10 md:py-28">
+        <section className="max-w-content mx-auto px-6 py-16 md:px-10 md:py-20">
           <p className="font-mono text-xs uppercase tracking-[0.14em] text-burgundy">
             How onboarding works
           </p>
@@ -123,7 +125,7 @@ export default async function SuppliersPage() {
         </section>
 
         {/* Closing CTA */}
-        <section className="max-w-content mx-auto px-6 py-20 md:px-10 md:py-28">
+        <section className="max-w-content mx-auto px-6 py-16 md:px-10 md:py-20">
           <div className="rounded-2xl border border-burgundy/30 bg-cream p-10 md:p-16">
             <p className="font-mono text-xs uppercase tracking-[0.14em] text-burgundy">
               Next step

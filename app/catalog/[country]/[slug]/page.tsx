@@ -4,6 +4,9 @@ import { getGiDetail } from '@/lib/queries/gi-entries'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 
+// Revalidate every hour — detail pages reflect updated producers/prices
+export const revalidate = 3600
+
 const COUNTRY_FLAGS: Record<string, string> = {
   IT: '🇮🇹',
   ES: '🇪🇸',

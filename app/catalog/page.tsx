@@ -7,6 +7,9 @@ import { SearchBox } from '@/app/catalog/_components/SearchBox'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 
+// Revalidate every 10 minutes — catalog filters refresh frequently
+export const revalidate = 600
+
 const COUNTRY_FLAGS: Record<string, string> = {
   IT: '🇮🇹',
   ES: '🇪🇸',

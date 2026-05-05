@@ -4,6 +4,10 @@ import { Footer } from '@/components/Footer'
 import { RequestAccessButton } from '@/components/RequestAccessButton'
 import { getIriskaStats, getCategoryCounts } from '@/lib/queries/stats'
 
+// Revalidate this page every hour — landing reflects live BD counts
+// without requiring a redeploy when data changes.
+export const revalidate = 3600
+
 const FEATURED_CATEGORIES = [
   { slug: 'cured_meats_charcuterie', label: 'Charcuterie', kicker: 'Iberian, Italian, French' },
   { slug: 'cheeses_dairy', label: 'Cheese & Dairy', kicker: 'PDO cheeses, butter, dairy' },
@@ -25,24 +29,35 @@ export default async function HomePage() {
 
       <main>
         {/* Hero */}
-        <section className="max-w-content mx-auto px-6 py-20 md:px-10 md:py-28">
-          <p className="font-mono text-xs uppercase tracking-[0.14em] text-burgundy">
-            AI-powered HoReCa procurement
-          </p>
-          <h1 className="font-display mt-4 text-5xl italic leading-[1.05] tracking-[-0.025em] text-burgundy-deep md:text-7xl">
-            Origin-driven sourcing<br />for serious kitchens.
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-[1.55] text-graphite md:text-xl">
-            Quality you can trace. Producers you can name. Protected and heritage products from European producers — accessible across borders, through one intelligent procurement platform.
-          </p>
-          <div className="mt-8 flex flex-wrap items-center gap-4">
-            <RequestAccessButton className="px-7 py-3" />
-            <Link
-              href="/catalog"
-              className="rounded-full border border-pebble/60 bg-cream px-7 py-3 font-mono text-xs uppercase tracking-[0.14em] text-burgundy transition-colors hover:border-burgundy/40"
-            >
-              Browse Catalog →
-            </Link>
+        <section className="max-w-content mx-auto px-6 py-16 md:px-10 md:py-20">
+        <div className="grid items-center gap-10 md:grid-cols-[1.1fr_1fr] md:gap-12">
+            <div>
+              <p className="font-mono text-xs uppercase tracking-[0.14em] text-burgundy">
+                AI-powered HoReCa procurement
+              </p>
+              <h1 className="font-display mt-4 text-5xl italic leading-[1.05] tracking-[-0.025em] text-burgundy-deep md:text-6xl lg:text-7xl">
+                Origin-driven sourcing<br />for serious kitchens.
+              </h1>
+              <p className="mt-6 max-w-xl text-lg leading-[1.55] text-graphite md:text-xl">
+                Quality you can trace. Producers you can name. Protected and heritage products from European producers — accessible across borders, through one intelligent procurement platform.
+              </p>
+              <div className="mt-8 flex flex-wrap items-center gap-4">
+                <RequestAccessButton className="px-7 py-3" />
+                <Link
+                  href="/catalog"
+                  className="rounded-full border border-pebble/60 bg-cream px-7 py-3 font-mono text-xs uppercase tracking-[0.14em] text-burgundy transition-colors hover:border-burgundy/40"
+                >
+                  Browse Catalog →
+                </Link>
+              </div>
+            </div>
+            <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-pebble/40 md:aspect-square">
+              <img
+                src="/images/hero.webp"
+                alt="Mediterranean charcuterie and cheese on a wooden board"
+                className="h-full w-full object-cover"
+              />
+            </div>
           </div>
         </section>
 
@@ -56,7 +71,7 @@ export default async function HomePage() {
           </div>
         </section>
         {/* How it works */}
-        <section id="how-it-works" className="max-w-content mx-auto px-6 py-20 md:px-10 md:py-28">
+        <section id="how-it-works" className="max-w-content mx-auto px-6 py-16 md:px-10 md:py-20">
           <p className="font-mono text-xs uppercase tracking-[0.14em] text-burgundy">
             How it works
           </p>
@@ -84,7 +99,7 @@ export default async function HomePage() {
 
         {/* Featured categories */}
         <section className="border-t border-pebble/40 bg-cream">
-          <div className="max-w-content mx-auto px-6 py-20 md:px-10 md:py-28">
+          <div className="max-w-content mx-auto px-6 py-16 md:px-10 md:py-20">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
                 <p className="font-mono text-xs uppercase tracking-[0.14em] text-burgundy">
@@ -124,7 +139,7 @@ export default async function HomePage() {
           </div>
         </section>
         {/* For Suppliers preview */}
-        <section className="max-w-content mx-auto px-6 py-20 md:px-10 md:py-28">
+        <section className="max-w-content mx-auto px-6 py-16 md:px-10 md:py-20">
           <div className="grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:items-center lg:gap-16">
             <div>
               <p className="font-mono text-xs uppercase tracking-[0.14em] text-burgundy">
