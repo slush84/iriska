@@ -104,12 +104,32 @@ Spanish HoReCa vocabulary and producer relationships.
 
 ### Active phase
 
-**Phase 2B.5 — Landing redesign** (in progress, started 2026-05-05)
-- Goal: production-ready landing for first supplier meeting (Tuesday)
-- Cross-EU positioning, Quality + Origin standard
-- Live data band (real DB counts), featured categories, For Suppliers section
+**(none — see Next phases)**
 
-### Next phases (planned this week)
+### Completed today (2026-05-05)
+
+**Phase 2B.5 — Landing redesign**
+- Hero: "Origin-driven sourcing for serious kitchens." + dual CTA
+- Reusable RequestAccessButton component (fixes copy-paste artifact
+  where multi-line `<a>` tags lost opening tag)
+- Live data band with real BD counts (giCount, producerCount, etc.)
+- How it works 3-step explainer
+- Featured categories with real counts, links to filtered catalog
+- For Suppliers preview section with partners@iriska.ai CTA
+- Full /suppliers page (4 reasons, 4 onboarding steps, stats reminder)
+
+**Phase 2B.6 — Visual upgrade + navigation polish**
+- Editorial hero photo (sandwich/charcuterie on wooden board)
+  in two-column layout (md:+ breakpoint)
+- Section padding tightened (py-16 md:py-20) across all pages
+- Reusable Header and Footer applied to /catalog and detail pages
+- Restored <Link> wrapper on catalog cards (clickability regression)
+- ISR revalidate directives on all pages:
+  - Landing/suppliers: 3600s (hourly)
+  - Catalog: 600s (10 min)
+  - Detail pages: 3600s (hourly)
+
+### Next phases (planned)
 
 - Phase 2B.6 — Header/Footer/Navigation polish across all pages
 - Phase 3.1 — Authentication setup (Supabase Auth, magic link)
