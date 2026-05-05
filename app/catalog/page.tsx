@@ -1,8 +1,11 @@
 import Link from 'next/link'
 import { getGiEntriesPage } from '@/lib/queries/gi-entries'
-import { CountryFilter } from './_components/CountryFilter'
-import { CategoryFilter } from './_components/CategoryFilter'
-import { SearchBox } from './_components/SearchBox'
+import { slugify } from '@/lib/utils/slug'
+import { CountryFilter } from '@/app/catalog/_components/CountryFilter'
+import { CategoryFilter } from '@/app/catalog/_components/CategoryFilter'
+import { SearchBox } from '@/app/catalog/_components/SearchBox'
+import { Header } from '@/components/Header'
+import { Footer } from '@/components/Footer'
 
 const COUNTRY_FLAGS: Record<string, string> = {
   IT: '🇮🇹',
@@ -56,6 +59,8 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
 
   return (
     <div className="min-h-screen bg-linen text-ink">
+      <Header />
+
       <main className="max-w-content mx-auto flex w-full flex-col px-6 py-12 md:px-10 md:py-16">
         <header className="mb-10">
           <p className="font-mono text-xs uppercase tracking-[0.14em] text-burgundy">Catalog</p>
@@ -89,27 +94,32 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
 
         {entries.length > 0 ? (
           <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {entries.map((entry) => (
-              <li
-                key={entry.gi_id}
-                className="rounded-2xl border border-pebble/60 bg-cream p-5 transition-colors hover:border-burgundy/40"
-              >
-                <div className="mb-3 flex items-center justify-between">
-                  <span className="text-2xl" aria-label={entry.country}>
-                    {COUNTRY_FLAGS[entry.country_code] ?? entry.country_code}
-                  </span>
-                  <span className="rounded-full border border-pebble/60 bg-bone px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-graphite">
-                    {entry.gi_type_primary}
-                  </span>
-                </div>
-                <h2 className="font-display text-lg italic leading-snug text-burgundy-deep">
-                  {entry.primary_gi_name}
-                </h2>
-                <p className="mt-2 text-xs uppercase tracking-[0.1em] text-stone">
-                  {CATEGORY_LABELS[entry.category] ?? entry.category}
-                </p>
-              </li>
-            ))}
+            {entries.map((entry) => {
+              const slug = slugify(entry.primary_gi_name)
+              return (
+                <li key={entry.gi_id}>
+                  <Link
+                    href={`/catalog/${entry.country_code}/${slug}`}
+                    className="block h-full rounded-2xl border border-pebble/60 bg-cream p-5 transition-colors hover:border-burgundy/40"
+                  >
+                    <div className="mb-3 flex items-center justify-between">
+                      <span className="text-2xl" aria-label={entry.country}>
+                        {COUNTRY_FLAGS[entry.country_code] ?? entry.country_code}
+                      </span>
+                      <span className="rounded-full border border-pebble/60 bg-bone px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-graphite">
+                        {entry.gi_type_primary}
+                      </span>
+                    </div>
+                    <h2 className="font-display text-lg italic leading-snug text-burgundy-deep">
+                      {entry.primary_gi_name}
+                    </h2>
+                    <p className="mt-2 text-xs uppercase tracking-[0.1em] text-stone">
+                      {CATEGORY_LABELS[entry.category] ?? entry.category}
+                    </p>
+                  </Link>
+                </li>
+              )
+            })}
           </ul>
         ) : (
           <EmptyState />
@@ -125,6 +135,8 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
           </nav>
         )}
       </main>
+
+      <Footer />
     </div>
   )
 }
