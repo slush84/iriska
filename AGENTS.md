@@ -15,15 +15,16 @@ Iriska project. Cursor and other AI tools auto-load this file (and CLAUDE.md
 which points here) when working in this repository. Read this first in any
 new session before suggesting changes.
 
-Last meaningful update: 2026-05-06
+Last meaningful update: 2026-05-06 (evening — buyer expansion + AI architecture)
 
 ---
 
 ## What Iriska is
 
-**Iriska.AI** — AI-powered B2B procurement platform for HoReCa
-(Hotel/Restaurant/Catering) sector. Marketplace play, not distributor.
-Analogous to Booking.com for restaurant procurement.
+**Iriska.AI** — AI-powered B2B procurement platform for premium European
+food products. Marketplace play, not distributor. Analogous to Booking.com
+for restaurant procurement, but extending naturally to specialty retail
+and online stores.
 
 **Tagline:** "The well-chosen list."
 
@@ -40,13 +41,6 @@ grid where ANY qualified producer in any participating country sells to
 ANY HoReCa buyer in any participating country. Geography determines
 logistics cost and feasibility, not platform eligibility.
 
-**Initial focus on Mediterranean producers** reflects (a) where founder
-network and supply-side partner are based (Spain), (b) where the GI
-dataset coverage is strongest at launch — NOT a permanent restriction
-on what gets listed. Dutch cheese producer, Belgian chocolatier, German
-charcutier, Polish smoked products, Czech preserves — all welcomed,
-all find buyers across the platform.
-
 **Initial supplier focus (marketing/business framing, NOT architectural
 constraint):** Mediterranean producers — Spain (ES), Italy (IT), France (FR),
 Portugal (PT), Greece (GR). This is where the GI dataset coverage is strongest
@@ -58,9 +52,32 @@ Denmark (DK), Austria (AT), Norway (NO), Sweden (SE), Poland (PL), Czech
 Republic (CZ). Plus full cross-flows: any participating country buys from
 any participating country (ES↔ES, ES↔IT, IT↔PT, etc.).
 
-**Expansion path:** smaller EU markets next, with localization
-(German, Dutch, Spanish, Italian, French, Portuguese UI). UK post-Brexit,
-Switzerland, Norway non-EU shipping — Phase 7+.
+**Buyer-side model (added 2026-05-06):** Iriska is NOT exclusively HoReCa.
+HoReCa (restaurants, hotels, catering) is the primary marketing focus and
+where the differentiated UX lives — menu pairing, reorder workflows, food
+cost intelligence. But architecturally, any qualified B2B buyer sourcing
+premium European products is welcome:
+
+- HoReCa: restaurants, hotels, catering, dark kitchens (primary focus)
+- Specialty retail: wine shops, gourmet stores, deli, cheese shops
+- Online retail: e-commerce gourmet stores, subscription boxes
+- Concept stores / B2B2C: design boutiques carrying food selections
+
+**Underlying mission:** open small quality producers to a wider B2B audience,
+letting them compete on organoleptic and craft advantage rather than volume
+or marketing spend. A Madrid online store buying Catalan fuet, an Amsterdam
+wine shop buying Spanish olive oil — these are valid Iriska transactions,
+not edge cases.
+
+**B2C direct-to-consumer:** Out of MVP scope. Considered for Phase 8+ as a
+separate vertical only after HoReCa B2B model is proven, cashflow stable,
+and we have a clear thesis on how a B2C extension would not dilute brand
+focus or fragment operational priority. Architecturally not blocked
+(`org_type` enum can extend), but not built for.
+
+**Expansion path:** smaller EU markets next, with localization (German,
+Dutch, Spanish, Italian, French, Portuguese UI). UK post-Brexit, Switzerland,
+Norway non-EU shipping — Phase 7+.
 
 ---
 
@@ -78,10 +95,16 @@ The following must NEVER appear in database schema or code:
   copy on landing/suppliers pages may emphasize Mediterranean as starting
   focus, but database queries, routing logic, catalog filtering, and shipping
   calculations must be country-agnostic.
+- **No `buyer_type = 'horeca'` enum-only constraint** — buyer org_type is
+  metadata, qualifying buyers are not restricted to HoReCa channel.
+- **No HoReCa-specific UI lock-in early in flow** — features like menu
+  pairing should be optional/contextual, not gating elsewhere in the buyer
+  experience.
 
-The marketing-focus list above is for sales priority and dataset coverage,
+The marketing-focus lists above are for sales priority and dataset coverage,
 not technical constraint. A Dutch cheese producer signing up tomorrow gets
-the same code path as a Spanish jamón producer.
+the same code path as a Spanish jamón producer. An Amsterdam wine shop gets
+the same buyer flow as a HoReCa restaurant.
 
 ---
 
@@ -111,6 +134,8 @@ Spanish HoReCa vocabulary and producer relationships.
 | 5-filter AI cascade | Spec done | price corridor → cuisine fit → ratings → inventory → seasonality |
 | Quality + Origin standard (not geographic) | Locked | Producer-to-buyer matching grid |
 | Mediterranean as starting territory only | Locked | Open to producers from any country meeting standards |
+| HoReCa as primary buyer focus only | Locked 2026-05-06 | Specialty retail / online stores welcomed architecturally |
+| B2C out of MVP, deferred to Phase 8+ | Locked 2026-05-06 | Reconsider only after HoReCa B2B proven, no brand dilution |
 | Iriska.AI naming | Active | Trademark filed as "Iriska" alone; .AI as identity-magnet |
 | Build self via Cursor + Claude API | Active | Save €50-70K vs outsourced |
 | All docs/outputs in Russian by default | Active | English UI copy, but specs/analyses in Russian |
@@ -130,6 +155,19 @@ Spanish HoReCa vocabulary and producer relationships.
 | Payments: Stripe vs Mollie | Pending | Mollie favored for NL/EU iDEAL/SEPA |
 | i18n architecture: next-intl from start | Locked 2026-05-06 | Add early to avoid hardcoded-strings retrofit pain |
 
+### AI integration & cost control
+
+| Decision | Status | Rationale |
+|---|---|---|
+| Anthropic Claude API as primary LLM | Locked 2026-05-06 | No fine-tuning, prompt engineering + RAG approach |
+| Hard monthly spend cap in Anthropic Console | Locked | Set on first deploy ($50 MVP, scaled later) |
+| Per-user app-level quotas | Locked | Free tier 20 AI calls/day, Pro 200/day, prevent abuse |
+| Cloudflare Turnstile on signup forms | Locked | Free anti-bot, on registration/login pages |
+| B2B verification as primary abuse barrier | Locked | KVK/VAT verification + manual approval initially |
+| Anomaly detection (rate spikes per user) | Phase 6 | Flag and pause if 10x normal usage |
+| Cost analytics per AI feature | Phase 6 | Know which features burn budget, optimize prompts |
+| Claude Haiku for chatbot, Sonnet for analysis | Locked | 3x cheaper for narrow tasks (FAQ, navigation) |
+
 ### Logistics & compliance
 
 | Decision | Status | Rationale |
@@ -141,6 +179,94 @@ Spanish HoReCa vocabulary and producer relationships.
 | Shipping cache TTL 15-30 min | Locked 2026-05-06 | Balance freshness vs API call cost |
 | Shipping markup 10-15% on Sendcloud cost | Locked | Per logistics spec, our margin on logistics |
 | Direct carrier contracts trigger | Defined | When GMV ≥ €15K/mo — switch DHL/PostNL/GLS to direct |
+
+---
+
+## AI integration philosophy
+
+This section exists so any future AI session understands HOW we use AI on
+Iriska, not just THAT we use it. Critical for not re-litigating decisions.
+
+### What we don't do
+
+- **We do not train or fine-tune LLMs ourselves.** Anthropic trains Claude.
+  We use the API. Fine-tuning is reserved for Phase 7+ when we have
+  proprietary conversation data and clear ROI thesis.
+- **We do not run our own LLM infrastructure.** No GPUs, no model weights
+  on our servers, no MLOps pipeline.
+
+### What we do
+
+**Three levels of integration, used progressively:**
+
+**Level 1 — Prompt engineering (90% of AI features):**
+- We send Claude API a request with system prompt + context + user query
+- Claude responds, we render
+- Cost: $0.005-0.04 per request (Sonnet) or $0.0005-0.002 (Haiku)
+- "Improvement" = iterating on system prompts, not model retraining
+
+**Level 2 — RAG (Retrieval-Augmented Generation):**
+- For DB-aware answers, first SQL/API search relevant data
+- Then send Claude: data + question → answer
+- This is where the 5-filter cascade lives
+- Most Iriska AI features are RAG: search by intent, menu pairing,
+  recommendations, quality score aggregation
+
+**Level 3 — Embeddings (semantic search, Phase 6.2+):**
+- Product descriptions converted to vectors once at write time
+- User queries vectorized at read time
+- Cosine similarity finds semantic matches
+- Cheap (~$0.0001 per query) but separate infrastructure (pgvector or Pinecone)
+- Use case: "find jamón with umami and nutty notes" matches descriptions
+  semantically even if those exact words aren't in the catalog
+
+### Where AI shows up in the product
+
+| Feature | Phase | Level | Cost/call |
+|---|---|---|---|
+| Search by intent ("ham for braising") | 6.1 | Prompt + RAG | ~$0.01 |
+| Auto-translation of product descriptions | 6.1 | Prompt | ~$0.005 |
+| Menu analysis (upload menu → suggestions) | 6.2 | RAG | ~$0.10-0.30 |
+| 5-filter recommendation cascade | 6.2 | RAG | ~$0.05 |
+| Smart reorder predictions | 6.3 | Prompt + history | ~$0.01 |
+| Quality score aggregation | 6.3 | RAG | ~$0.01 |
+| Wine card optimization | 6.4 | RAG | ~$0.05 |
+| Customer support chatbot widget | 4.6 | Prompt (Haiku) | ~$0.001 |
+| Semantic search | 7+ | Embeddings | ~$0.0001 |
+| Fine-tuning on Iriska conversations | 7+ | Custom model | one-time + premium per call |
+
+### Customer support chatbot (Phase 4.6)
+
+Separate concern from menu-pairing AI. Narrow scope at launch:
+
+- Lower-right corner widget on all pages
+- Knows: platform features, navigation, FAQ, terminology (DOP, payment terms)
+- Cannot: make purchases, modify orders, commit to terms
+- Tech: Claude Haiku (cheap), static knowledge-base markdown loaded as
+  system prompt context
+- Escalation: out-of-scope queries → email handoff to hello@iriska.ai
+- Anonymous use OK on public pages, but rate-limited per IP
+
+### Abuse protection layers
+
+1. **B2B registration verification** (primary barrier — handles 99%):
+   KVK/VAT number required, manual approval first 6 months
+2. **Cloudflare Turnstile** on signup/login (free, blocks automation)
+3. **Per-user quotas** in app DB: Free tier 20/day, Pro 200/day
+4. **Per-IP rate limits** for anonymous chatbot: 10/hour
+5. **Anomaly detection** (Phase 6): flag if usage > 10x baseline
+6. **Vercel/Cloudflare** infrastructure-level DDoS protection
+
+### Budget protection layers
+
+1. **Anthropic Console hard monthly cap** ($50 MVP, scale later) — API
+   physically stops above limit
+2. **Real-time alerts** if daily spend > threshold (Slack webhook)
+3. **Per-feature cost tracking** in DB to identify burn sources
+4. **Tier optimization**: use Haiku for narrow tasks, Sonnet only for
+   reasoning-heavy work
+5. **Prompt caching** (Anthropic feature) for repeated context — 90%
+   discount on cached tokens
 
 ---
 
@@ -170,26 +296,25 @@ Spanish HoReCa vocabulary and producer relationships.
 
 **Phase 2B.5 — Landing redesign (May 5)**
 - Hero: "Origin-driven sourcing for serious kitchens." + dual CTA
-- Reusable RequestAccessButton component (fixes copy-paste artifact
-  where multi-line `<a>` tags lost opening tag)
+- Reusable RequestAccessButton component
 - Live data band with real BD counts
 - How it works 3-step explainer
 - Featured categories with real counts, links to filtered catalog
-- For Suppliers preview section with partners@iriska.ai CTA
-- Full /suppliers page (4 reasons, 4 onboarding steps, stats reminder)
+- For Suppliers preview section
+- Full /suppliers page
 
-**Phase 2B.6 — Visual upgrade + navigation polish (May 5)**
-- Editorial hero photo (sandwich/charcuterie on wooden board)
-  in two-column layout (md:+ breakpoint)
-- Section padding tightened (py-16 md:py-20) across all pages
-- Reusable Header and Footer applied to /catalog and detail pages
-- Restored <Link> wrapper on catalog cards (clickability regression)
-- ISR revalidate directives on all pages
+**Phase 2B.6 — Visual upgrade (May 5)**
+- Editorial hero photo in two-column layout
+- Reusable Header and Footer applied to all pages
+- ISR revalidate directives
+
+**Phase 2B.7 — Spacing polish (May 6)**
+- Tightened section padding across landing and Footer
+- ~30% denser vertical rhythm, professional B2B pacing
 
 ### Active phase
 
-**Phase 2B.7 — Landing polish (pending)** — small spacing/empty-space
-adjustments noted by Sergei for fresh-eyes review
+**(none — between phases, planning Phase 3)**
 
 ### Next phases (planned)
 
@@ -198,9 +323,8 @@ adjustments noted by Sergei for fresh-eyes review
 - Phase 3.0: i18n architecture setup (next-intl, English-only content,
   language-ready scaffolding)
 - Phase 3.1: Authentication (Supabase Auth, magic link, supplier/buyer
-  user types, /login /signup /account pages)
-- Phase 3.2: Schema expansion (apply V003-V005 from larger backend
-  architecture: orgs, users, products, SKUs, taxonomy)
+  user types, /login /signup /account pages, Cloudflare Turnstile)
+- Phase 3.2: Schema expansion (orgs, users, products, SKUs, taxonomy)
   + LOGISTICS FIELDS (collect at supplier signup so we don't ask twice):
     - suppliers: pickup_address, pickup_zip, pickup_country,
       pickup_schedule, pickup_cutoff_time, lead_time_days,
@@ -215,7 +339,8 @@ adjustments noted by Sergei for fresh-eyes review
 
 **Phase 4 — Buyer MVP**
 
-- Phase 4.1: Restaurant onboarding (second user type)
+- Phase 4.1: Buyer onboarding (HoReCa, specialty retail, online retail —
+  unified buyer flow, org_type as metadata)
 - Phase 4.2: Multi-supplier cart
 - Phase 4.3: Checkout shell (order creation, no shipping logic yet)
 - Phase 4.4: Order tracking statuses
@@ -223,16 +348,15 @@ adjustments noted by Sergei for fresh-eyes review
   - Sendcloud sandbox account, API keys, lib/sendcloud.ts
   - ShippingProvider interface + SendcloudProvider implementation
   - Routing engine: groupCartBySupplier → analyzeTemperatureMix → quotes
-  - Catalog availability filter (shipping_zones table, weekly refresh
-    via Vercel Cron or Supabase pg_cron)
-  - Checkout UI with shipping options (Option A all-chilled vs
-    Option B split-by-temperature)
+  - Catalog availability filter (shipping_zones table, weekly refresh)
+  - Checkout UI with shipping options (split-by-temperature)
   - Sendcloud webhook handler (status updates, tracking)
   - Shipping quotes cache (15-30 min TTL)
-  - Edge cases: lead time, pickup schedule, min order, fragility,
-    hot weather warnings
-- Phase 4.6: Email infrastructure (Resend setup, transactional templates
-  via React Email, supplier order notifications, customer confirmations)
+  - Edge cases: lead time, pickup schedule, min order, fragility, hot weather
+- Phase 4.6: Email + customer support infrastructure
+  - Resend setup, transactional templates via React Email
+  - Supplier order notifications, customer confirmations
+  - **Customer support chatbot widget** (Claude Haiku, narrow scope)
 
 **Phase 5 — Trust + Localization**
 
@@ -241,15 +365,17 @@ adjustments noted by Sergei for fresh-eyes review
   - German next (NL/DE buyers)
   - Then Dutch, Italian, French, Portuguese
   - AI-assisted translation with human review for B2B copy
-- Phase 5.1: Trust score (two-sided, with formulas already in spec)
+- Phase 5.1: Trust score (two-sided)
 - Phase 5.2: Disputes & reviews
 
 **Phase 6 — AI layer (the differentiation)**
 
-- Phase 6.1: Menu analysis (upload menu → AI parses → sources)
-- Phase 6.2: 5-filter cascade recommendations
-- Phase 6.3: Smart reorder predictions
+- Phase 6.1: Search by intent + auto-translation
+- Phase 6.2: Menu analysis + 5-filter cascade
+- Phase 6.3: Smart reorder + quality score aggregation
 - Phase 6.4: Wine card optimization (when wine returns in Phase 7+)
+- Phase 6.x cost ops: per-feature cost tracking, anomaly detection,
+  prompt caching optimization
 
 **Phase 7+ — Scale**
 
@@ -261,6 +387,15 @@ adjustments noted by Sergei for fresh-eyes review
 - Mobile apps (React Native)
 - ERP integrations for top suppliers
 - API access for advanced suppliers
+- Embeddings semantic search
+- Fine-tuning Claude on Iriska conversation history
+
+**Phase 8+ — New verticals (only after MVP proven)**
+
+- B2C extension evaluation (separate vertical, separate brand decision,
+  only if HoReCa/B2B model proven and B2C wouldn't dilute focus)
+- Iriska Fulfillment Hub (Barcelona) — Ankorstore-style for small suppliers
+- Trade event/tasting infrastructure
 
 ---
 
@@ -362,9 +497,8 @@ when the time is right.
   curated Iriska panel exceptions.
 
 - **Multi-stop consolidation logistics (Phase 7+):** Single truck pickup
-  from multiple suppliers in same region (e.g. 5 producers in Salamanca
-  → one consolidation point → one trunk to Amsterdam). Major margin lever
-  but operationally complex.
+  from multiple suppliers in same region. Major margin lever but
+  operationally complex.
 
 - **Cron infrastructure decision:** Vercel Cron Hobby tier sufficient
   for weekly shipping_zones refresh, but Supabase pg_cron is in-database
@@ -373,6 +507,19 @@ when the time is right.
 - **Cold chain insurance review:** Standard parcel carrier insurance
   may not cover food spoilage from broken cold chain. Investigate
   Sendcloud and direct carrier policies before serious chilled volume.
+
+- **Landing/suppliers copy refresh:** Current copy emphasizes "kitchens"
+  and "HoReCa" exclusively. Refresh to reflect broader B2B buyer base
+  (specialty retail, online stores) while keeping HoReCa as primary
+  marketing voice. Not urgent — current copy is true for primary launch
+  audience, just incomplete for full architectural model.
+
+- **Faire/Ankorstore UX patterns adoption:** Detailed UX research document
+  identifies Tier-1 patterns to adopt (visual design, brand storytelling,
+  multi-filter discovery, free first-order replacement, net payment terms,
+  reorder workflows) and patterns to avoid (25% commission, margin filter,
+  uncurated catalog). Reference for systemic interface improvements before
+  buyer launch.
 
 ### Quick wins (when convenient)
 
@@ -389,8 +536,7 @@ when the time is right.
 ### Bugs (small, non-blocking)
 
 - **Data noise in GI names:** ~20 entries have annotations leaked into
-  `primary_gi_name` (e.g. "Andouille — French; not in Spain section").
-  Fix: single UPDATE pass.
+  `primary_gi_name`. Fix: single UPDATE pass.
 - **Sticky 404 for some heritage GIs:** needs deeper testing of `is_data_thin`
   entries that have nullable required fields.
 
@@ -400,8 +546,8 @@ when the time is right.
 
 **For AI sessions (Claude, Cursor, others):** Read this in full at the start
 of any new session before making code suggestions. The "Strategic decisions
-log" and "Current project state" sections are most important — don't
-re-litigate decisions already locked.
+log", "AI integration philosophy", and "Current project state" sections are
+most important — don't re-litigate decisions already locked.
 
 **For Sergei:** Update this file when:
 - A phase is completed (move from "Active" to "Completed")
