@@ -29,7 +29,7 @@ export default async function HomePage() {
 
       <main>
         {/* Hero */}
-        <section className="max-w-content mx-auto px-6 py-16 md:px-10 md:py-20">
+        <section className="max-w-content mx-auto px-6 pt-16 pb-10 md:px-10 md:pt-20 md:pb-12">
         <div className="grid items-center gap-10 md:grid-cols-[1.1fr_1fr] md:gap-12">
             <div>
               <p className="font-mono text-xs uppercase tracking-[0.14em] text-burgundy">
@@ -71,7 +71,7 @@ export default async function HomePage() {
           </div>
         </section>
         {/* How it works */}
-        <section id="how-it-works" className="max-w-content mx-auto px-6 py-16 md:px-10 md:py-20">
+        <section id="how-it-works" className="max-w-content mx-auto px-6 py-12 md:px-10 md:py-16">
           <p className="font-mono text-xs uppercase tracking-[0.14em] text-burgundy">
             How it works
           </p>
@@ -99,7 +99,7 @@ export default async function HomePage() {
 
         {/* Featured categories */}
         <section className="border-t border-pebble/40 bg-cream">
-          <div className="max-w-content mx-auto px-6 py-16 md:px-10 md:py-20">
+        <div className="max-w-content mx-auto px-6 py-12 md:px-10 md:py-16">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
                 <p className="font-mono text-xs uppercase tracking-[0.14em] text-burgundy">
@@ -139,7 +139,7 @@ export default async function HomePage() {
           </div>
         </section>
         {/* For Suppliers preview */}
-        <section className="max-w-content mx-auto px-6 py-16 md:px-10 md:py-20">
+        <section className="max-w-content mx-auto px-6 py-12 md:px-10 md:py-16">
           <div className="grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:items-center lg:gap-16">
             <div>
               <p className="font-mono text-xs uppercase tracking-[0.14em] text-burgundy">
