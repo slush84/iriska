@@ -1,0 +1,181 @@
+{
+    "Header": {
+      "catalog": "Catalog",
+      "howItWorks": "How it works",
+      "forSuppliers": "For Suppliers",
+      "requestAccess": "Request Access"
+    },
+    "Footer": {
+      "tagline": "The well-chosen list.",
+      "description": "Origin-driven sourcing for serious kitchens. Protected and heritage products from European producers — accessible across borders.",
+      "iriskaSection": "Iriska",
+      "catalogLink": "Catalog",
+      "forSuppliersLink": "For Suppliers",
+      "howItWorksLink": "How it works",
+      "contactSection": "Contact",
+      "locations": "Amsterdam · Barcelona",
+      "copyright": "Iriska B.V. All rights reserved.",
+      "brandLine": "IRISKA.AI · MEDITERRANEAN ORIGIN · EXPANDING BY STANDARD"
+    },
+    "Landing": {
+      "kicker": "AI-powered HoReCa procurement",
+      "heroH1Line1": "Origin-driven sourcing",
+      "heroH1Line2": "for serious kitchens.",
+      "heroDescription": "Quality you can trace. Producers you can name. Protected and heritage products from European producers — accessible across borders, through one intelligent procurement platform.",
+      "browseCatalog": "Browse Catalog",
+      "imageAlt": "Mediterranean charcuterie and cheese on a wooden board",
+      "stats": {
+        "protectedProducts": "protected products",
+        "verifiedProducers": "verified producers",
+        "originCountries": "origin countries",
+        "productCategories": "product categories"
+      },
+      "howItWorks": {
+        "kicker": "How it works",
+        "title1": "One platform. Three steps.",
+        "title2": "Less time chasing suppliers.",
+        "step1Title": "Discover",
+        "step1Body": "AI-powered search across a vetted catalog of protected and heritage European products. Filter by quality tier, origin, seasonality, or commercial vocabulary.",
+        "step2Title": "Compare",
+        "step2Body": "Transparent prices, multi-rating quality scores, producer profiles. See trust indicators, packaging formats, and lead times before you commit.",
+        "step3Title": "Order",
+        "step3Body": "Multi-supplier checkout, single invoice, smart reorder predictions. Logistics handled. Disputes resolved. One platform across borders."
+      },
+      "categories": {
+        "kicker": "Featured categories",
+        "title": "Where we start.",
+        "browseAll": "Browse all categories",
+        "protectedProducts": "protected products",
+        "charcuterieKicker": "Iberian, Italian, French",
+        "charcuterieLabel": "Charcuterie",
+        "cheeseKicker": "PDO cheeses, butter, dairy",
+        "cheeseLabel": "Cheese & Dairy",
+        "oliveOilKicker": "Single-estate, early harvest",
+        "oliveOilLabel": "Olive Oil",
+        "seafoodKicker": "Conservas, salt-cured, smoked",
+        "seafoodLabel": "Seafood",
+        "spicesKicker": "Saffron, Mediterranean herbs",
+        "spicesLabel": "Spices & Salt",
+        "grainsKicker": "Heritage cereals, artisan pasta",
+        "grainsLabel": "Rice, Pasta & Grains"
+      },
+      "suppliersPreview": {
+        "kicker": "For producers and distributors",
+        "title1": "Reach kitchens",
+        "title2": "that take quality seriously.",
+        "description": "Iriska connects European producers of protected and heritage products with HoReCa buyers across the continent — without the noise of generic B2B marketplaces. One platform, multiple countries, transparent pricing.",
+        "becomeSupplier": "Become a supplier",
+        "learnMore": "Learn more",
+        "benefit1Title": "List your SKUs in minutes",
+        "benefit1Body": "CSV import, fast manual editing, structured product data aligned with European GI registries.",
+        "benefit2Title": "Reach beyond your borders",
+        "benefit2Body": "One supplier profile visible to restaurants across Spain, Italy, France, Portugal, Netherlands and more.",
+        "benefit3Title": "Transparent commission, no hidden fees",
+        "benefit3Body": "Pay only on accepted orders. No listing fees, no platform subscription. Clear terms from day one.",
+        "benefit4Title": "Trust, traceability, premium positioning",
+        "benefit4Body": "Your origin story, certifications and quality standards get the visibility they deserve."
+      }
+    },
+    "Suppliers": {
+    "kicker": "For producers and distributors",
+    "heroH1Line1": "Your products,",
+    "heroH1Line2": "in the right kitchens.",
+    "heroDescription": "Iriska is a platform built for European producers of protected and heritage products. Reach HoReCa buyers across borders without losing your margin to generic B2B marketplaces or unreliable resellers.",
+    "becomeSupplier": "Become a supplier",
+    "seeCatalog": "See current catalog",
+    "whyIriska": {
+      "kicker": "Why Iriska",
+      "title1": "Built for serious producers,",
+      "title2": "not for the lowest bidder.",
+      "reason1Title": "Premium positioning, by default",
+      "reason1Body": "We don't list industrial products. Iriska accepts only PDO, PGI, TSG, AOP, DOP, AOC, Suisse Garantie, heritage producers, and quality-certified products. Your work appears alongside peers, not commodity goods.",
+      "reason2Title": "Cross-border reach, single platform",
+      "reason2Body": "One supplier profile visible to chefs and procurement teams across Spain, Italy, France, Portugal, Netherlands, Belgium, and growing. Sell to a Madrid restaurant or an Amsterdam hotel through the same dashboard.",
+      "reason3Title": "Transparent commission, no hidden fees",
+      "reason3Body": "No listing fees. No platform subscription. No exclusivity. You pay commission only on orders accepted by you, and only after the buyer has paid. Clear, written terms from day one.",
+      "reason4Title": "AI does the heavy lifting",
+      "reason4Body": "Iriska's recommendation engine matches your products to relevant restaurants based on cuisine, menu, price tier, seasonality, and quality ratings. You don't compete on visibility — you appear when you fit."
+    },
+    "howOnboarding": {
+      "kicker": "How onboarding works",
+      "title1": "From conversation",
+      "title2": "to first order in weeks, not quarters.",
+      "step1Title": "Initial conversation",
+      "step1Body": "We talk about your products, certifications, current channels, capacity, and target markets. No commitment yet — we make sure Iriska is the right platform for you, and you're the right fit for the catalog.",
+      "step2Title": "Profile and SKU listing",
+      "step2Body": "We help you create your supplier profile, import your product list (CSV or manual), and set pricing tiers. Your origin story, certifications, and producer credentials become the spine of how buyers find you.",
+      "step3Title": "Quality review",
+      "step3Body": "Our team reviews your profile against Iriska standards. Where data is missing, we work with you to complete it. Once approved, your products go live in the catalog and become visible to buyers.",
+      "step4Title": "First orders",
+      "step4Body": "Buyers discover, compare, and order through the platform. You receive structured order requests, confirm or decline, fulfil through your existing logistics, and get paid through Iriska's payment infrastructure."
+    },
+    "statsBlock": {
+      "kicker": "The catalog you're joining",
+      "summary": "{giCount} protected products. {producerCount} verified producers. {countryCount} origin countries. Growing.",
+      "description": "Iriska's catalog already maps every protected designation across our starting territory. Your SKUs link directly to these references — buyers see your offering with full provenance context, not as anonymous line items."
+    },
+    "closingCta": {
+      "kicker": "Next step",
+      "title": "Tell us about your products.",
+      "description": "Send us a brief introduction — what you make, where, your certifications, and the markets you currently serve. We'll respond within two business days.",
+      "contactCta": "Contact partners@iriska.ai"
+    }
+  },
+    "Catalog": {
+      "pageTitle": "Catalog — Iriska",
+      "kicker": "Protected & heritage products",
+      "title": "European fine food catalog.",
+      "description": "{count, plural, =0 {No products yet.} one {# protected product} other {# protected products}} from verified European producers. Filter by country, category, or search by name.",
+      "filters": {
+        "title": "Filters",
+        "country": "Country",
+        "allCountries": "All countries",
+        "category": "Category",
+        "allCategories": "All categories",
+        "search": "Search",
+        "searchPlaceholder": "Search by name…",
+        "clear": "Clear filters"
+      },
+      "results": {
+        "showing": "Showing {from}–{to} of {total}",
+        "noResults": "No products match your filters.",
+        "tryAdjusting": "Try adjusting your filters or clearing them."
+      },
+      "pagination": {
+        "previous": "Previous",
+        "next": "Next",
+        "page": "Page {current} of {total}"
+      },
+      "card": {
+        "protectedProducts": "protected products"
+      }
+    },
+    "CatalogDetail": {
+      "backToCatalog": "Back to catalog",
+      "tastingNotes": "Tasting notes",
+      "horecaUse": "HoReCa use",
+      "packaging": "Packaging",
+      "seasonality": "Seasonality",
+      "priceCorridor": "Price corridor",
+      "perKg": "per kg",
+      "confidence": {
+        "high": "High confidence",
+        "medium": "Medium confidence",
+        "dataThin": "Data thin"
+      },
+      "producers": "Producers",
+      "noProducers": "No verified producers listed yet for this product.",
+      "tier": {
+        "S": "Small",
+        "M": "Medium",
+        "L": "Large"
+      },
+      "dataThinNotice": {
+        "title": "More information coming soon",
+        "body": "We're enriching this product's data with verified producers, current pricing, and detailed information. Reach out if you're a producer or buyer interested in this category."
+      }
+    },
+    "RequestAccessButton": {
+      "default": "Request Access"
+    }
+  }

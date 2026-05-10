@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Newsreader, Bricolage_Grotesque, JetBrains_Mono } from "next/font/google";
-import "./globals.css";
+import { NextIntlClientProvider, hasLocale } from "next-intl";
+import { setRequestLocale } from "next-intl/server";
+import { notFound } from "next/navigation";
+import { routing } from "@/src/i18n/routing";
+import "../globals.css";
 
 // Editorial display — Newsreader italic
 const newsreader = Newsreader({
@@ -33,18 +37,34 @@ export const metadata: Metadata = {
     "AI-powered B2B procurement platform for HoReCa. Source premium Mediterranean wine, jamon, cheeses, and olive oil with precision.",
 };
 
-export default function RootLayout({
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
+
+export default async function LocaleLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await params;
+
+  if (!hasLocale(routing.locales, locale)) {
+    notFound();
+  }
+
+  setRequestLocale(locale);
+
   return (
     <html
-      lang="en"
+      lang={locale}
       className={`${newsreader.variable} ${bricolage.variable} ${jetbrains.variable}`}
     >
       <body className="font-sans bg-linen text-ink antialiased">
-        {children}
+        <NextIntlClientProvider>
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );

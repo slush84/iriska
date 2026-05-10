@@ -1,4 +1,5 @@
-import Link from 'next/link'
+import { useTranslations } from 'next-intl'
+import { Link } from '@/src/i18n/navigation'
 
 /**
  * Site-wide footer. Brand restatement, navigation, contact, legal stub.
@@ -6,6 +7,7 @@ import Link from 'next/link'
  * The four-column layout collapses to single column on mobile.
  */
 export function Footer() {
+  const t = useTranslations('Footer')
   const year = new Date().getFullYear()
 
   return (
@@ -14,17 +16,16 @@ export function Footer() {
         <div className="grid gap-10 md:grid-cols-4">
           <div className="md:col-span-2">
             <p className="font-display text-2xl italic leading-tight tracking-[-0.02em] text-burgundy-deep">
-              The well-chosen list.
+              {t('tagline')}
             </p>
             <p className="mt-3 max-w-md text-sm leading-relaxed text-graphite">
-              Origin-driven sourcing for serious kitchens. Protected and heritage
-              products from European producers — accessible across borders.
+              {t('description')}
             </p>
           </div>
 
           <div>
             <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.14em] text-burgundy">
-              Iriska
+              {t('iriskaSection')}
             </p>
             <ul className="space-y-2 text-sm">
               <li>
@@ -32,7 +33,7 @@ export function Footer() {
                   href="/catalog"
                   className="text-graphite transition-colors hover:text-burgundy"
                 >
-                  Catalog
+                  {t('catalogLink')}
                 </Link>
               </li>
               <li>
@@ -40,7 +41,7 @@ export function Footer() {
                   href="/suppliers"
                   className="text-graphite transition-colors hover:text-burgundy"
                 >
-                  For Suppliers
+                  {t('forSuppliersLink')}
                 </Link>
               </li>
               <li>
@@ -48,7 +49,7 @@ export function Footer() {
                   href="/#how-it-works"
                   className="text-graphite transition-colors hover:text-burgundy"
                 >
-                  How it works
+                  {t('howItWorksLink')}
                 </Link>
               </li>
             </ul>
@@ -56,7 +57,7 @@ export function Footer() {
 
           <div>
             <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.14em] text-burgundy">
-              Contact
+              {t('contactSection')}
             </p>
             <ul className="space-y-2 text-sm">
               <li>
@@ -75,15 +76,15 @@ export function Footer() {
                   partners@iriska.ai
                 </a>
               </li>
-              <li className="pt-1 text-stone">Amsterdam · Barcelona</li>
+              <li className="pt-1 text-stone">{t('locations')}</li>
             </ul>
           </div>
         </div>
 
         <div className="mt-12 flex flex-col gap-2 border-t border-pebble/40 pt-6 text-xs text-stone md:flex-row md:items-center md:justify-between">
-          <p>© {year} Iriska B.V. All rights reserved.</p>
+          <p>© {year} {t('copyright')}</p>
           <p className="font-mono uppercase tracking-[0.14em]">
-            Iriska.AI · Mediterranean origin · Expanding by standard
+            {t('brandLine')}
           </p>
         </div>
       </div>

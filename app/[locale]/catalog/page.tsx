@@ -1,9 +1,10 @@
-import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
+import { Link } from '@/src/i18n/navigation'
 import { getGiEntriesPage } from '@/lib/queries/gi-entries'
 import { slugify } from '@/lib/utils/slug'
-import { CountryFilter } from '@/app/catalog/_components/CountryFilter'
-import { CategoryFilter } from '@/app/catalog/_components/CategoryFilter'
-import { SearchBox } from '@/app/catalog/_components/SearchBox'
+import { CountryFilter } from './_components/CountryFilter'
+import { CategoryFilter } from './_components/CategoryFilter'
+import { SearchBox } from './_components/SearchBox'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 
@@ -51,12 +52,10 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
   const category = params.category ?? ''
   const search = params.search ?? ''
 
-  const { entries, totalCount, totalPages, currentPage } = await getGiEntriesPage({
-    page,
-    countryCode,
-    category,
-    search,
-  })
+  const [{ entries, totalCount, totalPages, currentPage }, t] = await Promise.all([
+    getGiEntriesPage({ page, countryCode, category, search }),
+    getTranslations('Catalog'),
+  ])
 
   const hasActiveFilters = Boolean(countryCode || category || search)
 
@@ -66,16 +65,16 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
 
       <main className="max-w-content mx-auto flex w-full flex-col px-6 py-12 md:px-10 md:py-16">
         <header className="mb-10">
-          <p className="font-mono text-xs uppercase tracking-[0.14em] text-burgundy">Catalog</p>
+          <p className="font-mono text-xs uppercase tracking-[0.14em] text-burgundy">{t('kicker')}</p>
           <h1 className="font-display mt-2 text-4xl italic leading-tight tracking-[-0.025em] text-burgundy-deep md:text-5xl">
-            Mediterranean Geographical Indications
+            {t('title')}
           </h1>
           <p className="mt-3 text-base text-graphite">
-            Browse {totalCount.toLocaleString()} protected products from Italy, Spain, France, Portugal & Greece.
+            {t('description', { count: totalCount })}
           </p>
         </header>
 
-        <section aria-label="Filters" className="mb-8 flex flex-col gap-5 border-y border-pebble/40 py-6">
+        <section aria-label={t('filters.title')} className="mb-8 flex flex-col gap-5 border-y border-pebble/40 py-6">
           <SearchBox currentSearch={search} />
           <CountryFilter currentCountry={countryCode} />
           <CategoryFilter currentCategory={category} />
@@ -90,7 +89,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
               href="/catalog"
               className="font-mono text-xs uppercase tracking-[0.14em] text-burgundy hover:text-burgundy-deep"
             >
-              Clear filters ✕
+              {t('filters.clear')} ✕
             </Link>
           )}
         </div>
@@ -125,16 +124,16 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
             })}
           </ul>
         ) : (
-          <EmptyState />
+          <EmptyState noResults={t('results.noResults')} tryAdjusting={t('results.tryAdjusting')} clearAll={t('filters.clear')} />
         )}
 
         {entries.length > 0 && totalPages > 1 && (
           <nav className="mt-12 flex items-center justify-between border-t border-pebble/40 pt-6">
-            <PaginationLink params={params} targetPage={currentPage - 1} disabled={currentPage <= 1} label="← Previous" />
+            <PaginationLink params={params} targetPage={currentPage - 1} disabled={currentPage <= 1} label={t('pagination.previous')} />
             <p className="font-mono text-xs uppercase tracking-[0.14em] text-graphite">
-              Page {currentPage} of {totalPages}
+              {t('pagination.page', { current: currentPage, total: totalPages })}
             </p>
-            <PaginationLink params={params} targetPage={currentPage + 1} disabled={currentPage >= totalPages} label="Next →" />
+            <PaginationLink params={params} targetPage={currentPage + 1} disabled={currentPage >= totalPages} label={t('pagination.next')} />
           </nav>
         )}
       </main>
@@ -144,16 +143,15 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
   )
 }
 
-function EmptyState() {
+function EmptyState({ noResults, tryAdjusting, clearAll }: { noResults: string; tryAdjusting: string; clearAll: string }) {
   return (
     <div className="rounded-2xl border border-pebble/60 bg-cream px-8 py-16 text-center">
-      <p className="font-display text-2xl italic text-burgundy-deep">No products match your filters.</p>
+      <p className="font-display text-2xl italic text-burgundy-deep">{noResults}</p>
       <p className="mt-3 text-base text-graphite">
-        Try removing one or more filters, or{' '}
+        {tryAdjusting}{' '}
         <Link href="/catalog" className="text-burgundy underline hover:text-burgundy-deep">
-          clear all
+          {clearAll}
         </Link>
-        {' '}to start over.
       </p>
     </div>
   )

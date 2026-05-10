@@ -1,5 +1,6 @@
-import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { notFound } from 'next/navigation'
+import { Link } from '@/src/i18n/navigation'
 import { getGiDetail } from '@/lib/queries/gi-entries'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
@@ -31,25 +32,29 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 const MONTH_LABELS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D']
 
-const TIER_LABELS: Record<string, string> = {
-  S: 'Small',
-  M: 'Medium',
-  L: 'Large',
-}
-
 interface PageProps {
   params: Promise<{ country: string; slug: string }>
 }
 
 export default async function GiDetailPage({ params }: PageProps) {
   const { country, slug } = await params
-  const data = await getGiDetail(country, slug)
+
+  const [data, t] = await Promise.all([
+    getGiDetail(country, slug),
+    getTranslations('CatalogDetail'),
+  ])
 
   if (!data) {
     notFound()
   }
 
   const { gi, producers, prices } = data
+
+  const tierLabels: Record<string, string> = {
+    S: t('tier.S'),
+    M: t('tier.M'),
+    L: t('tier.L'),
+  }
 
   return (
     <div className="min-h-screen bg-linen text-ink">
@@ -59,7 +64,7 @@ export default async function GiDetailPage({ params }: PageProps) {
           href="/catalog"
           className="font-mono text-xs uppercase tracking-[0.14em] text-burgundy hover:text-burgundy-deep"
         >
-          ← Back to catalog
+          ← {t('backToCatalog')}
         </Link>
 
         <header className="mt-8 mb-10 border-b border-pebble/40 pb-8">
@@ -90,21 +95,21 @@ export default async function GiDetailPage({ params }: PageProps) {
           <div className="space-y-10">
             {gi.tasting_notes && (
               <section>
-                <p className="mb-3 font-mono text-xs uppercase tracking-[0.14em] text-burgundy">Tasting notes</p>
+                <p className="mb-3 font-mono text-xs uppercase tracking-[0.14em] text-burgundy">{t('tastingNotes')}</p>
                 <p className="text-base leading-[1.7] text-graphite">{gi.tasting_notes}</p>
               </section>
             )}
 
             {gi.horeca_use && (
               <section>
-                <p className="mb-3 font-mono text-xs uppercase tracking-[0.14em] text-burgundy">HoReCa use</p>
+                <p className="mb-3 font-mono text-xs uppercase tracking-[0.14em] text-burgundy">{t('horecaUse')}</p>
                 <p className="text-base leading-[1.7] text-graphite">{gi.horeca_use}</p>
               </section>
             )}
 
             {gi.packaging_formats.length > 0 && (
               <section>
-                <p className="mb-3 font-mono text-xs uppercase tracking-[0.14em] text-burgundy">Packaging formats</p>
+                <p className="mb-3 font-mono text-xs uppercase tracking-[0.14em] text-burgundy">{t('packaging')}</p>
                 <ul className="flex flex-wrap gap-2">
                   {gi.packaging_formats.map((format) => (
                     <li key={format} className="rounded-full border border-pebble/60 bg-cream px-3 py-1 text-xs text-graphite">
@@ -117,7 +122,7 @@ export default async function GiDetailPage({ params }: PageProps) {
 
             {gi.seasonal_months.length > 0 && (
               <section>
-                <p className="mb-3 font-mono text-xs uppercase tracking-[0.14em] text-burgundy">Peak seasonality</p>
+                <p className="mb-3 font-mono text-xs uppercase tracking-[0.14em] text-burgundy">{t('seasonality')}</p>
                 <div className="flex gap-1.5" aria-label="Months indicator">
                   {MONTH_LABELS.map((label, i) => {
                     const month = i + 1
@@ -139,7 +144,7 @@ export default async function GiDetailPage({ params }: PageProps) {
           <aside className="space-y-10">
             {prices.length > 0 && (
               <section className="rounded-2xl border border-pebble/60 bg-cream p-6">
-                <p className="mb-4 font-mono text-xs uppercase tracking-[0.14em] text-burgundy">B2B price corridor</p>
+                <p className="mb-4 font-mono text-xs uppercase tracking-[0.14em] text-burgundy">{t('priceCorridor')}</p>
                 <ul className="space-y-4">
                   {prices.map((p) => (
                     <li key={p.sku_id} className="border-b border-pebble/40 pb-3 last:border-0 last:pb-0">
@@ -169,7 +174,7 @@ export default async function GiDetailPage({ params }: PageProps) {
 
             {producers.length > 0 && (
               <section>
-                <p className="mb-3 font-mono text-xs uppercase tracking-[0.14em] text-burgundy">Producers ({producers.length})</p>
+                <p className="mb-3 font-mono text-xs uppercase tracking-[0.14em] text-burgundy">{t('producers')} ({producers.length})</p>
                 <ul className="space-y-3">
                   {producers.map((producer) => (
                     <li key={producer.producer_id} className="rounded-xl border border-pebble/60 bg-cream p-4">
@@ -179,7 +184,7 @@ export default async function GiDetailPage({ params }: PageProps) {
                           {producer.region_town && <p className="mt-0.5 text-xs text-stone">{producer.region_town}</p>}
                         </div>
                         <span className="rounded-full border border-pebble/60 bg-bone px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.1em] text-graphite">
-                          {TIER_LABELS[producer.tier] ?? producer.tier}
+                          {tierLabels[producer.tier] ?? producer.tier}
                         </span>
                       </div>
                       {producer.website && (
@@ -202,7 +207,8 @@ export default async function GiDetailPage({ params }: PageProps) {
 
         {gi.is_data_thin && (
           <p className="mt-12 rounded-xl border border-ochre-soft bg-bone px-4 py-3 text-xs text-graphite">
-            Note: this entry has limited descriptive data. Information will be expanded as suppliers join the platform.
+            <span className="font-display italic text-burgundy-deep">{t('dataThinNotice.title')}.</span>{' '}
+            {t('dataThinNotice.body')}
           </p>
         )}
       </main>
