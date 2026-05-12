@@ -880,138 +880,281 @@ Iriska, not just THAT we use it.
 ---
 
 ## Current project state
+### Progress tracker (live)
+```
+TOTAL ESTIMATED HOURS: ~204h
+DONE:        ~39h   (19.1%)  ████░░░░░░░░░░░░░░░░
+NEXT BLOCK:  ~15h   (7.4%)   — Phases 3.1-3.4
+BLOCKED:     ~4h    (2.0%)   — Phase 3.5 (NL B.V. required)
+AFTER 3.5:   ~14h   (6.9%)   — Phases 3.6-3.8
+PHASE 4:     ~35h   (17.2%)
+PHASE 5:     ~14h   (6.9%)
+PHASE 6:     ~30h   (14.7%)
+PHASE 7:     ~29h   (14.2%)
+PHASE 8:     ~28h   (13.7%)
+To operational MVP (end of Phase 4):  ~84h   (~12 work days at 7h/day)
+To AI differentiation (Phase 6):      ~127h  (~18 work days)
+To full product:                      ~165h  (~24 work days)
+```
+Update this tracker every time a Phase closes. Recalculate percentages
+if new Phases are inserted or existing scope changes.
 
-### Completed phases
+### Completed phases (~39h)
 
-**Phase 1 — Initial landing (April 2026):** Next.js 16 + Vercel +
+**Phase 1 — Initial landing (April 2026, ~8h):** Next.js 16 + Vercel +
 GitHub repo, brand v1.0, production at `iriska-inky.vercel.app`.
 
-**Phase 2A — Database backend (April 29):** Supabase Postgres Frankfurt,
-6 tables, RLS public-read, GIN indexes, 958 GI / 396 producers / 354
-links / 487 prices / 364 heritage products loaded.
+**Phase 2A — Database backend (April 29, ~6h):** Supabase Postgres
+Frankfurt, 6 tables, RLS public-read, GIN indexes, 958 GI / 396
+producers / 354 links / 487 prices / 364 heritage products loaded.
 
-**Phase 2B.1-2B.4 — Catalog (May 1-4):** Typed Supabase client,
+**Phase 2B.1-2B.4 — Catalog (May 1-4, ~10h):** Typed Supabase client,
 paginated grid, accent-insensitive filters and search via custom
 `immutable_unaccent()` and pg_trgm GIN, country/slug detail pages.
 
-**Phase 2B.5-2B.6 — Landing redesign + visual upgrade (May 5):** Hero,
-live data band, How it works, Featured categories, For Suppliers preview,
-full /suppliers page, editorial hero photo, Header/Footer applied to all
-pages, ISR revalidation.
+**Phase 2B.5-2B.6 — Landing redesign + visual upgrade (May 5, ~5h):**
+Hero, live data band, How it works, Featured categories, For Suppliers
+preview, full /suppliers page, editorial hero photo, Header/Footer
+applied to all pages, ISR revalidation.
 
-**Phase 2B.7 — Spacing polish (May 6):** ~30% denser vertical rhythm,
-professional B2B pacing.
+**Phase 2B.7 — Spacing polish (May 6, ~1h):** ~30% denser vertical
+rhythm, professional B2B pacing.
+
+**Phase 3.0 — i18n architecture (May 10, ~6h):** next-intl 4.x,
+`src/i18n/{routing,request,navigation}.ts`, `proxy.ts` (Next.js 16
+convention replacing middleware.ts), `app/[locale]/` restructure,
+messages/en.json with all current copy as namespaced keys, all pages
++ Header + Footer + RequestAccessButton converted to translation keys.
+URL: `/` → `/en/`. Architecture ready for Phase 5 localization rollout.
+
+**Phase 3.0.5 — AI-first foundations (May 10, ~6h):** Four atomic
+commits laying the observable, automatable, AI-ready foundation.
+
+  1/4 Sentry — error tracking + performance + session replay + logs;
+      `instrumentation.ts`, `sentry.{server,edge}.config.ts`,
+      `app/global-error.tsx`, MCP config for Cursor, .gitignore
+      .env.sentry-build-plugin. Composed with next-intl in
+      `withSentryConfig(withNextIntl(nextConfig))`.
+
+  2/4 Pino structured logger + events_log infrastructure —
+      `lib/observability/logger.ts` with dev-mode pretty-print and
+      production JSON, `lib/observability/childLogger()` for persistent
+      context. `db/migrations/006_events_log.sql`: events_log table
+      with status enum, JSONB payload + GIN index, parent_event_id
+      self-FK, LISTEN/NOTIFY trigger, RLS with service_role permissive
+      policy + explicit GRANTs. `lib/events/emit.ts` wrapper around
+      Supabase admin client with type-safe EmitResult, fire-and-forget
+      semantics (never throws on DB failure), pre-flight Pino logging
+      for durability. 22 standardized EventType constants.
+
+  3/4 AI client abstraction — `lib/ai/` with provider-agnostic types,
+      Anthropic SDK wrapper, 3-attempt retry with exponential backoff,
+      error classification (rate_limit / timeout / invalid_request /
+      server_error / unknown), automatic emitEvent('ai_call.completed'
+      | 'ai_call.failed') for cost tracking, Pino child logger with
+      model/use_case/actor_id/trace_id context. Result-style return
+      type (ok: true | ok: false) so callers handle failures
+      gracefully. Model constants: CHEAPEST (Haiku), DEFAULT (Sonnet),
+      BEST (Opus).
+
+  4/4 Vercel Flags Toolkit + knowledge/ RAG skeleton — `lib/flags/`
+      with 6 feature flags all default-OFF for safe rollout
+      (ai_matching, deferred_payment, sentry_tunneling,
+      multi_supplier_checkout, b2c_experience, ai_auto_verification).
+      Each env-driven (FLAG_X=true) with Vercel dashboard override.
+      `app/.well-known/vercel/flags/route.ts` discovery endpoint for
+      Chrome Flags Toolkit extension (FLAGS_SECRET-signed auth).
+      `knowledge/` foundation for Phase 6+ RAG: README + 7 skeleton
+      files (faq/general, policies/{onboarding,verification,pricing},
+      glossary/terms, workflows/supplier-signup, certifications/
+      eu-quality-schemes). Frontmatter convention (title, category,
+      audience, last_reviewed) ready for downstream RAG ingestion.
+
+  Bonus (security upgrade): Supabase JWT signing migrated from Legacy
+  HS256 to ECC P-256 via standby+rotate flow. Legacy anon/service_role
+  JWT keys disabled, replaced with new Publishable + Secret API keys
+  (opaque tokens, modern standard). Production Vercel env vars complete
+  (SENTRY_AUTH_TOKEN, SUPABASE_SERVICE_ROLE_KEY, ANTHROPIC_API_KEY,
+  FLAGS_SECRET, NEXT_PUBLIC_SUPABASE_ANON_KEY updated). Production
+  deploy verified working. Workflow lesson captured in IMPROVEMENTS.
 
 ### Active phase
 
-**(none — between phases, planning Phase 3 with major architectural
-expansion from 2026-05-08 strategic decisions)**
+**(none — between phases, starting Phase 3.1 Auth)**
 
-### Next phases (planned, expanded 2026-05-08)
+### Linear roadmap (execution order)
 
-**Phase 3 — Foundation + Supplier MVP (~22-27h total)**
+Each Phase number = order of work. Dependencies explicit. If a Phase
+is blocked, downstream Phases that depend on it wait; independent
+Phases proceed in parallel.
 
-- **Phase 3.0:** i18n architecture (next-intl, English-only content,
-  language-ready scaffolding) — ~1h
-- **Phase 3.0.5:** AI-first foundations + integration scaffolding — ~4-5h
-  - Sentry setup
-  - Pino structured logger
-  - `events_log` table + `lib/events/emit.ts` helper
-  - `lib/ai/client.ts` AI provider abstraction (Anthropic only)
-  - `lib/observability/`, `lib/feature-flags/` (Vercel Flags)
-  - `knowledge/` folder structure (faq, policies, glossary, workflows,
-    certifications)
-  - Verification stack scaffolding: VIES client, Onfido/Veriff client,
-    registry API clients (KvK, INSEE, Camera di Commercio, Handelsregister),
-    eAmbrosia client, Claude Vision wrapper
-  - Quaderno API client scaffold
-  - Mollie webhook handler scaffold
-  - Supabase Storage policies for verification documents
-- **Phase 3.1:** Authentication (Supabase Auth, magic link, **three user
-  types: consumer / Organization member / supplier**, Cloudflare Turnstile
-  on forms) — ~3h
-- **Phase 3.2:** Schema expansion — ~4-5h
-  - `users` (auth users)
-  - `organizations` (verified legal entities, KYC fields, VAT, food safety)
-  - `locations` (per-org delivery points)
-  - `organization_members` (User-Organization with role: Owner/Manager/Buyer)
-  - `consumer_accounts` (B2C personal accounts)
-  - `suppliers` (extends organizations with supplier-specific fields:
-    pickup_address, pickup_zip, pickup_country, pickup_schedule,
-    pickup_cutoff_time, lead_time_days, consolidation_capability,
-    temperature_capabilities, sendcloud_sender_id)
-  - `products` (with dual pricing: price_b2b, price_b2c_list,
-    price_b2c_indicator computed; logistics: weight_kg, dimensions_cm,
-    temperature_class, fragility, min_order_unit, min_order_quantity,
-    packaging_options, shelf_life_days)
-  - `certifications` (static reference, ~80-120 entries)
-  - `product_certifications` (M2M)
-  - `verification_documents` (storage_path, document_type,
-    claude_vision_analysis, verification_decision)
-  - `supplier_ratings` (product_avg, operational_multiplier, final, history)
-  - `location_ratings` (per-location independent rating)
-  - `organization_ratings` (volume-weighted aggregate)
-  - `events_log` (already in 3.0.5)
-  - All actions emit events from this phase forward
-- **Phase 3.3:** Supplier dashboard (org profile, products list, CSV
-  import, manual SKU editing, logistics info, verification status flow,
-  document upload UI, KYC progress) — ~4-5h
-- **Phase 3.4:** Public supplier profile pages (hero, founder story,
-  badges, products, certifications, operating details) — ~2h
-- **Phase 3.5:** Catalog evolution showing "X suppliers offer this" — ~1-2h
-- **Phase 3.6:** Pricing & invoicing infrastructure — ~4h
-  - Dual pricing UI (supplier sets B2B + B2C per SKU)
-  - 20% gap T&C enforcement at form level
-  - AI-RRP indicator simple math (green/yellow/red zones based on
-    static multipliers; AI competitor parsing deferred to Phase 6.x)
-  - Quaderno integration scaffold
-  - Invoice generation logic (built, not activated until Phase 4)
-- **Phase 3.7:** Sourcing requests (buyer asks for unlisted product) — ~2h
+#### NOT BLOCKED — proceed now
 
-**Phase 4 — Buyer MVP + Logistics + Email**
+**Phase 3.1 — Auth (~3h)**
 
-- **Phase 4.1:** Buyer onboarding (HoReCa Organization with multi-location +
-  consumer accounts + specialty/online retail Organizations — unified flow
-  with `org_type` metadata and three-user-type Auth)
-- **Phase 4.2:** Multi-supplier cart with location selection at checkout
-- **Phase 4.3:** Checkout shell with dual payment paths (B2B Organization
-  billing vs B2C consumer)
-- **Phase 4.4:** Order tracking statuses + Mollie webhook activation
-- **Phase 4.5:** Logistics integration (Sendcloud + ShippingProvider +
-  routing engine + shipping_zones + temperature-aware splits + cache)
-- **Phase 4.5b:** Deferred payment infrastructure (M5-M6 calendar)
-  - Card pre-auth flow, PayPal Reference Transactions, SEPA DD B2B opt-in
-  - Interest tier UI, payment terms display, supplier credit risk T&C
-  - Iriska 0.25% interest share accounting
-- **Phase 4.6:** Email + customer support infrastructure
-  - Resend setup, transactional templates via React Email
-  - Supplier order notifications, customer confirmations
-  - Customer support chatbot widget (Claude Haiku, narrow scope)
+Supabase Auth setup, magic link (passwordless email login), Cloudflare
+Turnstile (anti-bot on signup), 3 user types (consumer / Organization
+member / supplier), session middleware, signin/signup/verify pages,
+emitEvent on auth lifecycle events.
 
-**Phase 5 — Trust + Localization**
+**Phase 3.2 — Schema expansion (~5h)**
 
-- Phase 5.0: Localization rollout (Spanish first for ES↔ES, ES↔IT cross-flows;
-  then DE for NL/DE buyers; then NL, IT, FR, PT)
-- Phase 5.1: Trust score (two-sided, formulas in spec)
-- Phase 5.2: Disputes & reviews
+Full data model migration:
+- `users` (Supabase auth users)
+- `organizations` (verified legal entities: KvK/CIF/SIRET/HRB, VAT,
+  food safety, 30 / 60 day payment terms preference)
+- `locations` (per-org delivery points)
+- `organization_members` (User ↔ Organization with Owner/Manager/Buyer role)
+- `consumer_accounts` (B2C personal accounts)
+- `suppliers` (extends organizations with pickup_address, pickup_zip,
+  pickup_country, pickup_schedule, pickup_cutoff_time, lead_time_days,
+  consolidation_capability, temperature_capabilities, sendcloud_sender_id)
+- `products` (dual pricing: price_b2b, price_b2c_list,
+  price_b2c_indicator computed; logistics: weight_kg, dimensions_cm,
+  temperature_class, fragility, min_order_unit, min_order_quantity,
+  packaging_options, shelf_life_days)
+- `certifications` (~80-120 static reference entries)
+- `product_certifications` (M2M)
+- `verification_documents` (storage_path, document_type,
+  claude_vision_analysis, verification_decision)
+- `supplier_ratings` (product_avg, operational_multiplier, final, history)
+- `location_ratings` (per-location independent)
+- `organization_ratings` (volume-weighted aggregate)
 
-**Phase 6 — AI layer (the differentiation)**
+All actions from this phase forward emit events to `events_log`.
 
-- Phase 6.1: Search by intent + auto-translation of product descriptions
-- Phase 6.2: Menu analysis + 5-filter cascade
-- Phase 6.3: Smart reorder predictions + quality score aggregation
-- Phase 6.4: Wine card optimization (when wine returns Y2)
-- Phase 6.x: AI-RRP full version (competitor parsing, market benchmarks,
-  conversion data, seasonality)
-- Phase 6.x ops: per-feature cost tracking, anomaly detection, prompt
-  caching optimization
+**Phase 3.3 — User profiles & settings (~4h)**
 
-**Phase 7+ — Scale**
+Profile pages, address management, member management for Organizations,
+preferences, password / magic-link management, email change flow.
 
-- Direct carrier contracts (DHL Freight, PostNL, GLS) when GMV ≥ €15K/mo
-- Multi-stop consolidation (1 truck, multiple pickup suppliers)
-- Wine + alcohol return Y2 (NL-licensed distributor partnership, EMCS,
-  fiscal rep)
+**Phase 3.4 — Sourcing requests (~3h)**
+
+Buyer requests product not in catalog. Suppliers respond. Notification
+flow via emitEvent. Status tracking. Sets up the demand-signal data
+that Phase 6 AI matching will consume.
+
+#### BLOCKED — Phase 3.5 (NL B.V. required, ~1 week wait)
+
+**Phase 3.5 — External integrations (~4h)**
+
+Free providers (no NL B.V. needed):
+- VIES VAT validation (EU-wide, public API, no auth)
+- eAmbrosia PDO/PGI registry (EU, public)
+- INSEE Sirene (FR companies, public API, no auth)
+
+Paid providers (require NL B.V. credentials for billing/access):
+- KvK (NL companies, €0.30/check)
+- Camera di Commercio (IT companies, €2-5/check)
+- Handelsregister (DE companies, €1.50/check)
+- Mollie payment integration (NL B.V. needed for production keys)
+- Quaderno invoicing integration
+- Supabase Storage policies for verification documents
+
+This Phase is intentionally placed AFTER 3.4 because Phases 3.1-3.4
+do not depend on it. If NL B.V. registration delays, work continues
+on 3.6+ in parallel only where dependencies allow. Risk-handling
+guidance: see "If NL B.V. delayed" section below.
+
+#### AFTER 3.5 — dependencies satisfied
+
+**Phase 3.6 — Supplier dashboard (~5h)**
+
+UI for org profile, products list, CSV import, manual SKU editing,
+logistics info, verification status flow (calls 3.5 verification APIs),
+document upload UI, KYC progress display.
+
+**Phase 3.7 — Catalog evolution (~4h)**
+
+Real supplier products replacing seeded GI benchmarks. Live prices
+from suppliers. "X suppliers offer this product" indicator. Catalog
+becomes operationally meaningful (not just reference data).
+
+**Phase 3.8 — Pricing & invoicing UI (~5h)**
+
+Dual pricing UI (supplier sets B2B + B2C per SKU). 20% gap T&C
+enforcement at form level. AI-RRP indicator simple math (green/yellow/
+red zones; AI competitor parsing deferred to Phase 6). Quaderno
+invoice generation logic (built, not activated until Phase 4 checkout).
+Mollie checkout integration (test mode in 3.5, live keys here).
+
+#### Phase 4 — Buyer MVP + Logistics + Email (~35h)
+
+- **4.1 Cart & basket (~4h):** Multi-supplier cart with location
+  selection at checkout. Supplier-grouped basket display.
+- **4.2 Checkout flow (~6h):** Dual payment paths (B2B Organization
+  billing vs B2C consumer). Address validation. Order summary.
+- **4.3 Logistics integration (~5h):** Sendcloud + ShippingProvider +
+  routing engine + shipping_zones + temperature-aware splits + cache.
+- **4.4 Email infrastructure (~3h):** Resend setup, transactional
+  templates via React Email, supplier order notifications, customer
+  confirmations.
+- **4.5 Chatbot v1 (~6h):** Customer support chatbot widget using
+  Claude Haiku, narrow scope, RAG over knowledge/ folder.
+- **4.6 Order management (~5h):** Order tracking statuses + Mollie
+  webhook activation + supplier accept/decline flow + buyer
+  cancellation rules + dispute initiation hook.
+- **4.7 Deferred payment infrastructure (~6h):** M5-M6 calendar
+  launch — Card pre-auth flow, PayPal Reference Transactions, SEPA DD
+  B2B opt-in. Interest tier UI, payment terms display, supplier credit
+  risk T&C. Iriska 0.25% interest share accounting.
+
+#### Phase 5 — Trust + Localization (~14h)
+
+- **5.1 Trust signals UI (~4h):** Ratings display, reviews, supplier
+  verification badges, rating-to-payment-term mapping visible to buyers.
+- **5.2 Spanish localization (~6h):** messages/es.json, content review,
+  cultural adaptation, ES-specific legal copy (VAT, T&C).
+- **5.3 Dispute mediation flow (~4h):** Buyer-supplier dispute opening,
+  evidence upload, founder review queue, resolution outcomes.
+
+#### Phase 6 — AI layer (the differentiation, ~30h)
+
+- **6.1 RAG ingestion pipeline (~5h):** knowledge/**/*.md → chunk by
+  ## headings → embed via voyage-2 (or similar) → store in
+  `knowledge_embeddings` Supabase table with pgvector. Query at
+  runtime: cosine similarity → top-K → Claude context.
+- **6.2 AI matching engine (~10h):** 5-filter cascade (price corridor
+  → cuisine/menu fit → quality ratings → inventory availability →
+  card balance/seasonality). Per-buyer personalization. A/B testing
+  via Vercel Flags.
+- **6.3 Menu analysis (~6h):** Restaurant uploads menu (image/PDF) →
+  Claude Vision extracts dishes → AI suggests products that match
+  cuisine and price tier.
+- **6.4 AI-RRP competitor parsing (~5h):** Multi-rating sourcing —
+  Vivino, Wine-Searcher (Parker/Suckling/Decanter), Guía Peñin,
+  CellarTracker for wine (when wine returns Y2); generic competitor
+  price scraping for non-wine.
+- **6.5 Chatbot v2 with full RAG (~4h):** Upgrade Phase 4.5 chatbot
+  with full knowledge base + product catalog + user history context.
+
+#### Phase 7+ — Scale (~29h estimated)
+
+- **7.1 Direct carriers (~5h):** DHL Freight, PostNL, GLS API contracts
+  when GMV ≥ €15K/mo (replace Sendcloud aggregator for cost).
+- **7.2 Alcohol/wine return Y2 (~6h):** NL-licensed distributor
+  partnership, EMCS, fiscal rep, AGB/accijns infrastructure.
+- **7.3 Multi-stop consolidation (~6h):** 1 truck, multiple pickup
+  suppliers, routing engine extension.
+- **7.4 Localization NL/FR/IT/DE/PT (~12h):** Five additional language
+  rollouts in priority order: DE first (NL/DE buyer base), then NL,
+  then IT, FR, PT.
+
+#### Phase 8+ — B2C extension + Fulfillment Hub (~28h estimated)
+
+- **8.1 B2C consumer UX (~10h):** Separate experience track from B2B
+  HoReCa. Consumer-friendly navigation, recipes, gift packaging.
+- **8.2 Consumer pricing 15% tier (~3h):** B2C take rate UI, displayed
+  inclusive of VAT, 20% gap enforcement from supplier B2B price.
+- **8.3 Iriska Fulfillment Hub (Barcelona) (~15h):** Ankorstore-style
+  warehouse for small suppliers without own logistics. Inventory
+  management, pick-pack-ship, sub-suppliers' SKUs into Iriska shipments.
+
+#### Phase 9+ — Optional / future
+
+- Trade event/tasting infrastructure
+- Tax structure optimization (Cyprus/Ireland reconsideration if profit
+  exceeds €1M Y3+)
 - UK post-Brexit customs, Norway, Switzerland
 - Mobile apps (React Native)
 - ERP integrations for top suppliers
@@ -1023,12 +1166,23 @@ expansion from 2026-05-08 strategic decisions)**
 - Per-location invoicing for chains
 - Group buying (independent restaurants aggregator pricing)
 
-**Phase 8+ — Optional new verticals**
+### Risk handling
 
-- Iriska Fulfillment Hub (Barcelona) — Ankorstore-style for small suppliers
-- Trade event/tasting infrastructure
-- Tax structure optimization (Cyprus/Ireland reconsideration if profit
-  exceeds €1M Y3+)
+**If NL B.V. delayed > 2 weeks:**
+- Phase 3.5 can be partial: VIES + eAmbrosia + INSEE work without
+  NL B.V. (free APIs, no billing)
+- Phase 3.6 supplier dashboard can be built with only free verification
+  sources — Spain/France/Portugal/EU suppliers fully onboardable
+- NL/DE/IT suppliers blocked at verification step, manual founder
+  review until paid APIs available
+- Phase 4 buyer MVP can proceed using Mollie test mode; switch to live
+  keys when NL B.V. ready
+
+**If registrations temporarily require an existing entity:**
+- Atlander Unipessoal LDA can be used for test API access only (Mollie
+  test mode, KvK sandbox) but NOT production billing
+- Architecture supports credential rotation (proven with Supabase JWT
+  rotation in Phase 3.0.5)
 
 ---
 
@@ -1240,6 +1394,64 @@ iriska/
   `primary_gi_name`. Single UPDATE pass.
 - **Sticky 404 for some heritage GIs:** deeper testing of `is_data_thin`
   entries with nullable required fields.
+
+### Workflow lessons learned
+
+These are operational lessons from working sessions, captured to prevent
+repeating mistakes. Each entry: what happened, why it happened, what to
+do differently.
+
+- **Never output secrets via Terminal commands (2026-05-10):** During
+  Phase 3.0.5 setup, a Terminal command was used to retrieve a Supabase
+  service_role key (`cat .env.local | grep | sed`), and the Terminal
+  output containing the live key was pasted into chat. The key had to
+  be rotated immediately (full Supabase JWT signing key rotation:
+  Legacy HS256 → ECC P-256 standby → current, plus migration from
+  legacy anon/service_role JWTs to modern Publishable + Secret API
+  keys). Lesson: when working with secrets, copy directly from Cursor
+  file view to clipboard — never via Terminal commands that echo the
+  value. The `cat | grep | sed` pattern for retrieving env values is
+  banned even when the user is the only intended recipient, because
+  Terminal scroll-back is fungible with chat paste.
+
+- **Copy-paste artefact: opening JSX tags lost in chat-to-Cursor
+  paste (2026-05-10):** When Claude provides multi-line JSX with an
+  opening tag on its own line (e.g. `<a` then `  href="..."` on the
+  next line), the Claude desktop app's clipboard handler strips the
+  bare `<a` during copy. This results in JSX with `href="..."` but no
+  parent element, breaking compilation. Workaround: paste through
+  Notes or another text editor first, verify the opening tag is
+  present, then paste into Cursor. Reported via /bug. Until fixed in
+  Claude app, prefer single-line opening tags when providing JSX
+  examples (`<a href="..." className="...">text</a>` instead of the
+  multi-line form), or instruct user to manually verify opening tag
+  presence after each paste.
+
+- **Turbopack OOM after long dev sessions (2026-05-10):** Node.js
+  default heap is 4GB. Long dev sessions with many hot reloads
+  accumulate memory pressure in Turbopack; eventual OOM crash forces
+  `npm run dev` restart. Fix: `rm -rf .next && npm run dev` clears
+  Turbopack cache. If recurring within 30 min, set
+  `NODE_OPTIONS=--max-old-space-size=8192 npm run dev`. Not urgent
+  but document for future sessions.
+
+- **PostgREST RLS requires BOTH permissive policy AND role-level GRANT
+  (2026-05-10):** When creating tables that need service_role access
+  (e.g. events_log), it is not enough to add a permissive RLS policy
+  for service_role — PostgREST also requires explicit
+  `GRANT INSERT, SELECT, UPDATE, DELETE` on the table and
+  `GRANT USAGE, SELECT` on associated sequences. Migrations creating
+  new RLS-protected tables must include both. Already documented in
+  `db/migrations/006_events_log.sql` end-of-file grants section as
+  reference pattern.
+
+- **Phase numbering can shift on dependency reordering:** Original
+  phase numbers in earlier AGENTS.md versions assumed a fixed plan.
+  In practice, registration timing (NL B.V.), partner availability,
+  and external dependencies shift execution order. Linear numbering
+  by execution order (current convention) means a Phase number =
+  the order in which work is done, not original-plan slot. When
+  reshuffling, recalculate Progress tracker hours and percentages.
 
 ---
 
