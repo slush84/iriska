@@ -1,5 +1,8 @@
-import { createHash } from 'crypto'
+import { createHash } from 'node:crypto'
 import { NextResponse } from 'next/server'
+
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 function fp(v: string | undefined) {
   if (!v) return { present: false }
